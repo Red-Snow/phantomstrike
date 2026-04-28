@@ -79,11 +79,18 @@ class ToolRunner:
         start_time = time.monotonic()
 
         try:
-            process = await asyncio.create_subprocess_exec(
-                *command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
+            if getattr(plugin, "use_shell", False):
+                process = await asyncio.create_subprocess_shell(
+                    cmd_str,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+            else:
+                process = await asyncio.create_subprocess_exec(
+                    *command,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
 
             # Stream output while collecting it
             stdout_lines: list[str] = []

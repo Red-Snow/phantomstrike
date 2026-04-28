@@ -174,6 +174,9 @@ class BaseToolPlugin(ABC):
     timeout: int = 600
     """Default timeout in seconds for this tool."""
 
+    use_shell: bool = False
+    """If True, command is executed in a shell (supports pipes and redirects)."""
+
     # ── Input schema (override in subclass) ───────────────────────────────────
 
     class InputSchema(BaseModel):
