@@ -63,9 +63,9 @@ You → "Pentest example.com" → AI Agent → PhantomStrike MCP → Tools → S
 
 | Option | Setup | Best For |
 |--------|-------|----------|
-| **A. [All-in-Kali VM](docs/SETUP.md#option-a-everything-inside-kali-vm--recommended)** ⭐ | Install everything inside Kali/Parrot VM | Pentesters, full tool access |
-| **B. [Split: Mac + VM](docs/SETUP.md#option-b-split-setup--ai-on-macos-tools-on-kali-vm)** | Claude on macOS, tools on Kali VM | Multi-machine workflows |
-| **C. [Docker](docs/SETUP.md#option-c-docker--no-vm-required)** | No VM — tools run in a container | Quick demos, CI/CD |
+| **A. [All-in-Kali VM](docs/SETUP.md#option-a-everything-inside-kali-vm--recommended)** ⭐ | Install inside Kali VM (or Windows WSL2) | Pentesters, full tool access |
+| **B. [Split: Host + VM](docs/SETUP.md#option-b-split-setup--ai-on-host-tools-on-kali-vm)** | Claude/Cursor on Mac/Win, tools on Kali VM | Multi-machine workflows |
+| **C. [Docker](docs/SETUP.md#option-c-docker--no-vm-required)** | No VM — tools run in a container (Mac/Win/Linux) | Quick demos, CI/CD |
 
 > 📖 **[Full Setup Guide →](docs/SETUP.md)** — Detailed step-by-step instructions, pros/cons, and troubleshooting for each option.
 
@@ -114,7 +114,7 @@ Add to your `claude_desktop_config.json`:
 
 ### Cursor / VS Code Copilot
 
-Add to `.vscode/mcp.json`:
+Add to `.cursor/mcp.json` (or `~/.cursor/mcp.json` globally):
 
 ```json
 {
