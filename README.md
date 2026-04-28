@@ -59,41 +59,47 @@ You → "Pentest example.com" → AI Agent → PhantomStrike MCP → Tools → S
 
 ## 🚀 Getting Started
 
-### One-Command Install (Kali/Parrot/Ubuntu)
+### 3 Deployment Options
+
+| Option | Setup | Best For |
+|--------|-------|----------|
+| **A. [All-in-Kali VM](docs/SETUP.md#option-a-everything-inside-kali-vm--recommended)** ⭐ | Install everything inside Kali/Parrot VM | Pentesters, full tool access |
+| **B. [Split: Mac + VM](docs/SETUP.md#option-b-split-setup--ai-on-macos-tools-on-kali-vm)** | Claude on macOS, tools on Kali VM | Multi-machine workflows |
+| **C. [Docker](docs/SETUP.md#option-c-docker--no-vm-required)** | No VM — tools run in a container | Quick demos, CI/CD |
+
+> 📖 **[Full Setup Guide →](docs/SETUP.md)** — Detailed step-by-step instructions, pros/cons, and troubleshooting for each option.
+
+### Quick Install (Option A — Kali/Parrot/Ubuntu)
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/install.sh | bash
 ```
 
+### Docker Quick Start (Option C)
+
+```bash
+git clone https://github.com/Red-Snow/phantomstrike.git && cd phantomstrike
+docker compose up -d
+```
+
 ### Manual Install
 
 ```bash
-# Clone the repository
 git clone https://github.com/Red-Snow/phantomstrike.git
 cd phantomstrike
-
-# Create virtual environment
 python3 -m venv .venv && source .venv/bin/activate
-
-# Install PhantomStrike
 pip install -e .
-```
-
-### Docker (Zero Setup)
-
-```bash
-git clone https://github.com/Red-Snow/phantomstrike.git
-cd phantomstrike
-docker compose up
 ```
 
 ---
 
 ## 🔌 Connect to Your AI Agent
 
+> 📖 See the **[Full Setup Guide](docs/SETUP.md)** for detailed configuration per deployment option.
+
 ### Claude Desktop
 
-Add to `~/.config/claude/claude_desktop_config.json`:
+Add to your `claude_desktop_config.json`:
 
 ```json
 {
@@ -131,6 +137,21 @@ Add to `~/.gemini/settings.json`:
     "phantomstrike": {
       "command": "/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
       "args": ["--mode", "local"]
+    }
+  }
+}
+```
+
+### Remote Mode (Split Setup — Option B)
+
+When your AI agent is on Mac and tools are on a Kali VM:
+
+```json
+{
+  "mcpServers": {
+    "phantomstrike": {
+      "command": "/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
+      "args": ["--mode", "remote", "--server", "http://KALI_VM_IP:8443"]
     }
   }
 }
