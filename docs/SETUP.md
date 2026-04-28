@@ -268,6 +268,9 @@ curl http://192.168.72.128:8443/health
 
 ### Step 3 — On Your Host: Install PhantomStrike MCP Client
 
+> 💡 **Why install it twice?** 
+> In this split setup, the **Kali VM** runs the API Server (which executes the attacks), while your **Host machine** runs the MCP Client (which talks to Claude/Cursor via `stdio` and forwards the requests over HTTP to Kali). Both components are included in the same repository.
+
 **macOS**
 
 ```bash
