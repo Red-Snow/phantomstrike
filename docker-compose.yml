@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  phantomstrike:
+    build: .
+    container_name: phantomstrike-server
+    ports:
+      - "8443:8443"
+    volumes:
+      - phantomstrike-data:/home/phantom/.phantomstrike
+      - ./reports:/app/reports
+    environment:
+      - PHANTOMSTRIKE_HOST=0.0.0.0
+      - PHANTOMSTRIKE_PORT=8443
+      - PHANTOMSTRIKE_AUTH_ENABLED=true
+      - PHANTOMSTRIKE_LOG_LEVEL=INFO
+    restart: unless-stopped
+    # Security: limit resources
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 4G
+
+volumes:
+  phantomstrike-data:

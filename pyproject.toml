@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phantomstrike"
+version = "1.0.0"
+description = "AI-powered MCP cybersecurity framework — modular, secure, and extensible pentesting automation for any LLM agent."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Farman Ullah Khan"},
+]
+keywords = [
+    "mcp", "cybersecurity", "pentesting", "ai-agents",
+    "vulnerability-scanner", "security-automation",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "fastmcp>=2.0.0",
+    "pydantic>=2.5.0",
+    "aiosqlite>=0.19.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "jinja2>=3.1.0",
+    "rich>=13.7.0",
+    "httpx>=0.27.0",
+    "websockets>=12.0",
+    "psutil>=5.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.3.0",
+]
+
+[project.scripts]
+phantomstrike = "phantomstrike.main:main"
+phantomstrike-mcp = "phantomstrike.mcp.client:main"
+
+[project.urls]
+Homepage = "https://github.com/Red-Snow/phantomstrike"
+Documentation = "https://Red-Snow.github.io/phantomstrike/"
+Repository = "https://github.com/Red-Snow/phantomstrike"
+Issues = "https://github.com/Red-Snow/phantomstrike/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

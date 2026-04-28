@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "phantomstrike": {
+      "command": "phantomstrike-mcp",
+      "args": ["--mode", "local"],
+      "env": {
+        "PHANTOMSTRIKE_LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
