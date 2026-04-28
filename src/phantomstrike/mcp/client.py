@@ -43,12 +43,7 @@ def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
     Returns:
         Configured FastMCP instance ready to run.
     """
-    mcp = FastMCP(
-        "phantomstrike",
-        description=f"PhantomStrike AI v{__version__} — Modular cybersecurity framework with "
-                    f"{len(registry)} tools. Categories: network scanning, web app testing, "
-                    f"cloud security, OSINT, password attacks, and more.",
-    )
+    mcp = FastMCP("phantomstrike")
 
     if mode == "remote":
         _register_remote_tools(mcp, server_url)
