@@ -84,9 +84,8 @@ Inside the Kali terminal:
 ```bash
 sudo apt update && sudo apt full-upgrade -y
 
-# Install the full Kali tool set (optional but recommended)
-sudo apt install -y kali-linux-default
-```
+# Install the core PhantomStrike tools
+sudo apt install -y nmap masscan amass hydra ffuf gobuster nikto nuclei sqlmap subfinder
 
 ---
 
@@ -226,6 +225,11 @@ Your AI agent (Claude Desktop) runs on your **macOS or Windows host**. PhantomSt
 ### Step 1 — On Kali VM: Install and Start the API Server
 
 ```bash
+# Install core tools
+sudo apt update
+sudo apt install -y nmap masscan amass hydra ffuf gobuster nikto nuclei sqlmap subfinder
+
+# Install PhantomStrike
 git clone https://github.com/Red-Snow/phantomstrike.git
 cd phantomstrike
 python3 -m venv .venv
