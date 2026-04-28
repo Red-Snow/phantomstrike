@@ -60,6 +60,13 @@ def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
         Returns a summary of all registered tools, categories, and availability.
         Use this to discover what tools are available before running scans.
         """
+        if mode == "remote":
+            try:
+                async with httpx.AsyncClient(timeout=10) as client:
+                    resp = await client.get(f"{server_url}/health")
+                    return resp.json().get("plugins", {})
+            except Exception as e:
+                return {"error": f"Failed to fetch remote tool list: {e}"}
         return registry.summary()
 
     @mcp.tool()
@@ -84,6 +91,14 @@ def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
         Check PhantomStrike system health — server status, available tools,
         and database connectivity.
         """
+        if mode == "remote":
+            try:
+                async with httpx.AsyncClient(timeout=10) as client:
+                    resp = await client.get(f"{server_url}/health")
+                    return resp.json()
+            except Exception as e:
+                return {"error": f"Failed to reach PhantomStrike API server: {e}"}
+
         return {
             "status": "healthy",
             "version": __version__,
