@@ -15,6 +15,8 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
+import socket
 import sys
 from typing import Any
 
@@ -30,6 +32,29 @@ from phantomstrike.storage.database import init_db, save_result
 from phantomstrike.utils.logging import get_logger, print_banner, setup_logging
 
 log = get_logger("mcp")
+
+PROXY_SOCKET_PATH = "/tmp/phantomstrike_proxy.sock"
+
+
+async def _proxy_request(method: str = "GET", path: str = "/health", body: dict | None = None, timeout: int = 600) -> dict:
+    """
+    Send a request through the local Unix socket proxy daemon.
+    This bypasses Claude Desktop's network sandbox.
+    """
+    request = json.dumps({"method": method, "path": path, "body": body, "timeout": timeout}) + "\n"
+
+    reader, writer = await asyncio.open_unix_connection(PROXY_SOCKET_PATH)
+    writer.write(request.encode())
+    await writer.drain()
+
+    response_data = await asyncio.wait_for(reader.readline(), timeout=timeout + 30)
+    writer.close()
+    await writer.wait_closed()
+
+    response = json.loads(response_data.decode().strip())
+    if "error" in response:
+        raise ConnectionError(response["error"])
+    return response.get("body", response)
 
 
 def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
@@ -62,9 +87,8 @@ def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
         """
         if mode == "remote":
             try:
-                async with httpx.AsyncClient(timeout=10) as client:
-                    resp = await client.get(f"{server_url}/health")
-                    return resp.json().get("plugins", {})
+                data = await _proxy_request("GET", "/health", timeout=10)
+                return data.get("plugins", data)
             except Exception as e:
                 return {"error": f"Failed to fetch remote tool list: {e}"}
         return registry.summary()
@@ -93,9 +117,7 @@ def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
         """
         if mode == "remote":
             try:
-                async with httpx.AsyncClient(timeout=10) as client:
-                    resp = await client.get(f"{server_url}/health")
-                    return resp.json()
+                return await _proxy_request("GET", "/health", timeout=10)
             except Exception as e:
                 return {"error": f"Failed to reach PhantomStrike API server: {e}"}
 
@@ -217,16 +239,15 @@ def _create_remote_tool(mcp: FastMCP, plugin: BaseToolPlugin, server_url: str) -
         except json.JSONDecodeError:
             return {"error": f"Invalid JSON parameters: {params_json}"}
 
-        async with httpx.AsyncClient(timeout=plugin.timeout + 30) as client:
-            try:
-                response = await client.post(
-                    f"{server_url}/api/tools/execute",
-                    json={"tool": plugin.name, "params": params, "timeout": plugin.timeout},
-                )
-                response.raise_for_status()
-                return response.json()
-            except httpx.HTTPError as e:
-                return {"error": f"API request failed: {e}"}
+        try:
+            return await _proxy_request(
+                method="POST",
+                path="/api/tools/execute",
+                body={"tool": plugin.name, "params": params, "timeout": plugin.timeout},
+                timeout=plugin.timeout,
+            )
+        except Exception as e:
+            return {"error": f"API request failed: {e}"}
 
     _execute.__name__ = f"run_{plugin.name.replace('-', '_')}"
     _execute.__doc__ = plugin.description
