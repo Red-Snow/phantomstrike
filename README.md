@@ -15,119 +15,164 @@
  ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝
 ```
 
-### 🔥 AI-Powered MCP Cybersecurity Framework
-
-**The modular, secure, and extensible way to run pentesting tools from any AI agent.**
+### 🔥 AI-Powered Pentesting — Run 600+ Kali Linux Tools from Claude Desktop
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![MCP Compatible](https://img.shields.io/badge/MCP-compatible-purple?style=for-the-badge)](https://modelcontextprotocol.io/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 
-**Works with: Claude Desktop • Cursor • VS Code Copilot • Gemini CLI • Any MCP Client**
-
-[Getting Started](#-getting-started) •
-[Architecture](#-architecture) •
-[Supported Tools](#-supported-tools) •
-[Configuration](#-configuration) •
-[Contributing](#-contributing)
-
----
+**Works with: Claude Desktop · Cursor · VS Code Copilot · Gemini CLI · Any MCP Client**
 
 </div>
 
+---
+
 ## ⚡ What is PhantomStrike?
 
-PhantomStrike is an **MCP (Model Context Protocol) server** that gives AI agents the ability to run real cybersecurity tools — Nmap, Nuclei, SQLMap, and more — on your machine or VM and return **structured, parsed results**.
+PhantomStrike connects your AI assistant to a **Kali Linux VM** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). Instead of switching between terminals, just tell Claude what you want:
 
 ```
-You → "Pentest example.com" → AI Agent → PhantomStrike MCP → Tools → Structured Results → AI Report
+You:    "Scan 192.168.1.1 for open ports, then enumerate any web services you find."
+Claude: Runs nmap → finds port 80 → runs nikto + gobuster → gives you a full report.
 ```
 
-### 🎯 Why PhantomStrike?
-
-| Feature | Traditional Approach | PhantomStrike |
-|---------|---------------------|---------------|
-| **Tool execution** | Manual terminal commands | AI-driven, automated |
-| **Output format** | Raw text blobs | Structured JSON with findings |
-| **Tool selection** | Human decides | AI intelligently chains tools |
-| **Reporting** | Manual write-up | AI-generated professional reports |
-| **Multi-tool workflows** | Scripted, fragile | Dynamic, adaptive |
-| **Extensibility** | Edit core code | Drop-in plugin system |
+- **12 structured plugins** (nmap, nuclei, sqlmap, hydra, etc.) with parsed JSON output
+- **Universal shell tool** — run literally *any* command installed on Kali (`wpscan`, `metasploit`, `enum4linux`, `aircrack-ng`, etc.)
+- **AI-driven tool chaining** — Claude reads results and automatically decides what to run next
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Setup Guide
 
-### 3 Deployment Options
+PhantomStrike uses a **split architecture**: your AI agent runs on your host machine (Mac/Windows/Linux), and security tools execute on a **Kali Linux VM**.
 
-| Option | Setup | Best For |
-|--------|-------|----------|
-| **A. [All-in-Kali VM](docs/SETUP.md#option-a-everything-inside-kali-vm--recommended)** ⭐ | Install inside Kali VM (or Windows WSL2) | Pentesters, full tool access |
-| **B. [Split: Host + VM](docs/SETUP.md#option-b-split-setup--ai-on-host-tools-on-kali-vm)** | Claude/Cursor on Mac/Win, tools on Kali VM | Multi-machine workflows |
-| **C. [Docker](docs/SETUP.md#option-c-docker--no-vm-required)** | No VM — tools run in a container (Mac/Win/Linux) | Quick demos, CI/CD |
-
-> 📖 **[Full Setup Guide →](docs/SETUP.md)** — Detailed step-by-step instructions, pros/cons, and troubleshooting for each option.
-
-### Quick Install (Option A — Kali/Parrot/Ubuntu)
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/install.sh | bash
+```
+┌──────────────┐    Unix Socket    ┌───────────────┐    HTTP/TCP    ┌──────────────┐
+│  Claude       │ ◄──────────────► │  Proxy Daemon  │ ◄────────────► │  Kali VM     │
+│  Desktop      │  (local IPC)     │  (on your Mac) │  (network)     │  API Server  │
+└──────────────┘                   └───────────────┘                └──────────────┘
 ```
 
-### Docker Quick Start (Option C)
+### Prerequisites
 
-```bash
-git clone https://github.com/Red-Snow/phantomstrike.git && cd phantomstrike
-docker compose up -d
-```
+| Component | Requirement |
+|-----------|-------------|
+| **Host machine** | macOS, Windows, or Linux with Python 3.10+ |
+| **Kali Linux VM** | VMware, VirtualBox, or bare metal — with network access from host |
+| **AI Client** | Claude Desktop, Cursor, VS Code Copilot, or any MCP client |
 
-### Manual Install
+---
+
+### Step 1 — Install on Kali VM
+
+SSH into your Kali VM (or open a terminal) and run:
 
 ```bash
 git clone https://github.com/Red-Snow/phantomstrike.git
 cd phantomstrike
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+Start the API server:
+
+```bash
+phantomstrike --host 0.0.0.0 --port 8443
+```
+
+You should see all 13 plugins registered with ✅. **Leave this terminal open.**
+
+---
+
+### Step 2 — Install on your Host Machine
+
+Open a terminal on your **Mac / Windows / Linux** host:
+
+```bash
+git clone https://github.com/Red-Snow/phantomstrike.git
+cd phantomstrike
+python3 -m venv .venv
+```
+
+**Activate the virtual environment:**
+
+| OS | Command |
+|----|---------|
+| macOS / Linux | `source .venv/bin/activate` |
+| Windows (PowerShell) | `.venv\Scripts\Activate.ps1` |
+| Windows (CMD) | `.venv\Scripts\activate.bat` |
+
+Then install:
+
+```bash
 pip install -e .
 ```
 
 ---
 
-## 🔌 Connect to Your AI Agent
+### Step 3 — Start the Proxy Daemon
 
-> 📖 See the **[Full Setup Guide](docs/SETUP.md)** for detailed configuration per deployment option.
+> **Why is this needed?** Claude Desktop sandboxes MCP processes and blocks their outbound network connections. The proxy daemon runs outside this sandbox and relays requests to the Kali VM via a local Unix socket (macOS/Linux) or named pipe (Windows).
 
-### Claude Desktop
+In a **new terminal tab** on your host machine:
 
-Add to your `claude_desktop_config.json`:
+```bash
+cd phantomstrike
+source .venv/bin/activate        # or .venv\Scripts\Activate.ps1 on Windows
+python3 proxy_daemon.py --remote http://YOUR_KALI_IP:8443
+```
+
+Replace `YOUR_KALI_IP` with your Kali VM's IP address (find it with `ip a` on Kali).
+
+You should see:
+```
+🔌 PhantomStrike Proxy Daemon running
+   Socket: /tmp/phantomstrike_proxy.sock
+   Remote: http://YOUR_KALI_IP:8443
+```
+
+**Leave this terminal open.**
+
+---
+
+### Step 4 — Configure your AI Client
+
+#### Claude Desktop
+
+Open Settings → Developer → Edit Config, and set:
 
 ```json
 {
   "mcpServers": {
     "phantomstrike": {
-      "command": "/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
-      "args": ["--mode", "local"]
+      "command": "/full/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
+      "args": ["--mode", "remote", "--server", "http://YOUR_KALI_IP:8443"]
     }
   }
 }
 ```
 
-### Cursor / VS Code Copilot
+> **Tip:** Find the full path by running `which phantomstrike-mcp` (with the venv activated).
 
-Add to `.cursor/mcp.json` (or `~/.cursor/mcp.json` globally):
+> **Windows users:** Use the full `.exe` path, e.g. `C:\\Users\\you\\phantomstrike\\.venv\\Scripts\\phantomstrike-mcp.exe`
+
+#### Cursor / VS Code Copilot
+
+Add to `.cursor/mcp.json`:
 
 ```json
 {
   "servers": {
     "phantomstrike": {
-      "command": "/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
-      "args": ["--mode", "local"]
+      "command": "/full/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
+      "args": ["--mode", "remote", "--server", "http://YOUR_KALI_IP:8443"]
     }
   }
 }
 ```
 
-### Gemini CLI
+#### Gemini CLI
 
 Add to `~/.gemini/settings.json`:
 
@@ -135,31 +180,85 @@ Add to `~/.gemini/settings.json`:
 {
   "mcpServers": {
     "phantomstrike": {
-      "command": "/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
-      "args": ["--mode", "local"]
+      "command": "/full/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
+      "args": ["--mode", "remote", "--server", "http://YOUR_KALI_IP:8443"]
     }
   }
 }
 ```
 
-### Remote Mode (Split Setup — Option B)
+**Restart your AI client** after saving the config.
 
-When your AI agent is on Mac and tools are on a Kali VM:
+---
 
-```json
-{
-  "mcpServers": {
-    "phantomstrike": {
-      "command": "/path/to/phantomstrike/.venv/bin/phantomstrike-mcp",
-      "args": ["--mode", "remote", "--server", "http://KALI_VM_IP:8443"]
-    }
-  }
-}
+### Step 5 — Verify
+
+Open a new chat in your AI client and type:
+
+```
+Use run_kali_shell to run "whoami" on the Kali VM.
 ```
 
-### Any Other MCP Client
+If you see `root` — **you're done!** 🎉
 
-PhantomStrike uses the standard MCP stdio transport. Point your client to `phantomstrike-mcp` and you're done.
+---
+
+## ✅ Startup Checklist (Daily Use)
+
+Every time you want to use PhantomStrike, make sure these 3 things are running:
+
+| # | Where | Command |
+|---|-------|---------|
+| 1 | **Kali VM** | `cd ~/phantomstrike && source .venv/bin/activate && phantomstrike --host 0.0.0.0 --port 8443` |
+| 2 | **Host (new tab)** | `cd ~/phantomstrike && source .venv/bin/activate && python3 proxy_daemon.py --remote http://KALI_IP:8443` |
+| 3 | **Host** | Open Claude Desktop / Cursor / etc. |
+
+---
+
+## 🛠️ Supported Tools
+
+### Structured Plugins (parsed JSON output)
+
+| Category | Tools |
+|----------|-------|
+| 🌐 **Network** | `nmap` · `rustscan` · `masscan` |
+| 🕸️ **Web App** | `nuclei` · `gobuster` · `sqlmap` · `ffuf` · `nikto` |
+| 🔍 **OSINT** | `subfinder` · `amass` |
+| 🔑 **Password** | `hydra` |
+| ☁️ **Cloud** | `trivy` |
+
+### Universal Shell (`run_kali_shell`)
+
+Run **any** command on the Kali VM. The AI reads the raw output and interprets it for you:
+
+| Just say... | Claude runs... |
+|-------------|---------------|
+| "Enumerate SMB shares on the target" | `enum4linux-ng -A 192.168.1.1` |
+| "Scan for WordPress vulnerabilities" | `wpscan --url http://target --enumerate vp,vt,u` |
+| "Check for SNMP misconfigs" | `snmpwalk -v2c -c public 192.168.1.1` |
+| "Crack these hashes" | `hashcat -m 0 hashes.txt /usr/share/wordlists/rockyou.txt` |
+| "Run a Metasploit scan" | `msfconsole -q -x "db_nmap -sV target; vulns"` |
+
+---
+
+## 💬 Usage Examples
+
+```
+"Scan 192.168.1.1 for open ports and services"
+→ Runs nmap with service detection, returns structured findings
+
+"Find subdomains of example.com"
+→ Runs subfinder + amass, deduplicates results
+
+"Do a full pentest recon on 10.0.0.5"
+→ Chains nmap → nikto → gobuster → nuclei automatically
+
+"Test https://target.com/login for SQL injection"
+→ Runs sqlmap in batch mode with parsed results
+
+"List all Kali tools related to WiFi hacking"
+→ Runs dpkg -l | grep aircrack and shows available tools
+```
 
 ---
 
@@ -172,15 +271,23 @@ PhantomStrike uses the standard MCP stdio transport. Point your client to `phant
 └────────────────┬────────────────────────────────────────────┘
                  │ MCP Protocol (stdio)
 ┌────────────────▼────────────────────────────────────────────┐
-│  PhantomStrike MCP Server                                   │
+│  PhantomStrike MCP Client (on your host machine)            │
+│  ┌──────────────┐  ┌─────────────────────────────────────┐  │
+│  │ Plugin        │  │ Unix Socket IPC                     │  │
+│  │ Registry      │  │ → Proxy Daemon → HTTP → Kali VM    │  │
+│  └──────────────┘  └─────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                 │ HTTP (your network)
+┌────────────────▼────────────────────────────────────────────┐
+│  PhantomStrike API Server (on Kali VM)                      │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐│
 │  │ Plugin       │ │ Async Job    │ │ Tool Runner          ││
 │  │ Registry     │ │ Queue        │ │ (safe subprocess)    ││
 │  └──────┬───────┘ └──────┬───────┘ └──────────┬───────────┘│
-│         │                │                     │            │
 │  ┌──────▼────────────────▼─────────────────────▼──────────┐│
-│  │  Plugins: nmap │ nuclei │ sqlmap │ gobuster │ hydra    ││
-│  │           ffuf │ nikto  │ subfinder │ amass  │ trivy    ││
+│  │  nmap │ nuclei │ sqlmap │ gobuster │ hydra │ nikto     ││
+│  │  ffuf │ subfinder │ amass │ rustscan │ masscan │ trivy  ││
+│  │  kali_shell (universal — ANY command)                   ││
 │  └────────────────────────────────────────────────────────┘│
 │  ┌────────────────────────────────────────────────────────┐│
 │  │  SQLite Database │ Structured Results │ Scan History   ││
@@ -188,86 +295,16 @@ PhantomStrike uses the standard MCP stdio transport. Point your client to `phant
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Key Design Principles
-
-- **🔌 Plugin Architecture** — Each tool is a self-contained Python file. Adding a new tool = adding one file.
-- **🔒 Secure by Default** — Input validation, no `shell=True`, API authentication.
-- **⚡ Async Execution** — Tools run in the background with real-time output streaming.
-- **📊 Structured Output** — Every tool returns parsed JSON, not raw text.
-- **💾 Persistent History** — All scan results saved to SQLite for future reference.
-- **🐳 Docker Ready** — Run everything in an isolated container.
-
 ---
 
-## 🛠️ Supported Tools
+## 🧩 Adding Custom Plugins
 
-| Category | Tools | Status |
-|----------|-------|--------|
-| **🌐 Network** | `nmap` · `rustscan` · `masscan` | ✅ Ready |
-| **🕸️ Web App** | `nuclei` · `gobuster` · `sqlmap` · `ffuf` · `nikto` | ✅ Ready |
-| **🔍 OSINT** | `subfinder` · `amass` | ✅ Ready |
-| **🔑 Password** | `hydra` | ✅ Ready |
-| **☁️ Cloud** | `trivy` | ✅ Ready |
-| **📦 More** | _Community contributions welcome!_ | 🔜 Coming |
-
-> **Don't see your tool?** Adding a new one takes ~50 lines of code. See [Plugin Development](#-plugin-development).
-
----
-
-## 💬 Usage Examples
-
-Once connected to your AI agent, just ask naturally:
-
-```
-"Scan 192.168.1.1 for open ports and services"
-→ PhantomStrike runs nmap with XML output parsing
-
-"Find subdomains of example.com"
-→ PhantomStrike runs subfinder + amass
-
-"Test https://target.com/login for SQL injection"
-→ PhantomStrike runs sqlmap in batch mode
-
-"Run a comprehensive vulnerability scan on https://target.com"
-→ PhantomStrike chains: nmap → nuclei → gobuster → nikto
-
-"Scan the Docker image nginx:latest for CVEs"
-→ PhantomStrike runs trivy with JSON output
-```
-
-The AI agent decides which tools to use and interprets the results — you get a complete analysis with findings and recommendations.
-
----
-
-## ⚙️ Configuration
-
-Copy `.env.example` to `.env` and customize:
-
-```bash
-cp .env.example .env
-```
-
-Key settings:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PHANTOMSTRIKE_HOST` | `127.0.0.1` | Server bind address |
-| `PHANTOMSTRIKE_PORT` | `8443` | Server port |
-| `PHANTOMSTRIKE_AUTH_ENABLED` | `true` | Enable API authentication |
-| `PHANTOMSTRIKE_MAX_JOBS` | `5` | Max concurrent tool executions |
-| `PHANTOMSTRIKE_TIMEOUT` | `600` | Default tool timeout (seconds) |
-| `PHANTOMSTRIKE_LOG_LEVEL` | `INFO` | Logging verbosity |
-
----
-
-## 🧩 Plugin Development
-
-Creating a new tool plugin is simple. Create a new file in `src/phantomstrike/plugins/<category>/`:
+Create a new file in `src/phantomstrike/plugins/<category>/`:
 
 ```python
 from pydantic import BaseModel, Field
 from phantomstrike.plugins.base import (
-    BaseToolPlugin, Finding, Severity, ToolCategory, ToolResult, ToolStatus,
+    BaseToolPlugin, ToolCategory, ToolResult, ToolStatus,
 )
 
 class MyToolPlugin(BaseToolPlugin):
@@ -279,75 +316,31 @@ class MyToolPlugin(BaseToolPlugin):
 
     class InputSchema(BaseModel):
         target: str = Field(..., description="Target to scan")
-        # Add your parameters here
 
     def build_command(self, params: InputSchema) -> list[str]:
         return ["mytool", "--target", params.target]
 
     def parse_output(self, stdout: str, stderr: str, exit_code: int) -> ToolResult:
-        result = ToolResult(
+        return ToolResult(
             tool_name=self.name,
             status=ToolStatus.SUCCESS if exit_code == 0 else ToolStatus.FAILED,
-            target="",
-            stdout=stdout,
-            stderr=stderr,
+            target="", stdout=stdout, stderr=stderr,
         )
-        # Parse stdout into structured findings
-        return result
 ```
 
-That's it. The plugin is automatically discovered and registered as an MCP tool.
+Drop it in, restart — it's automatically discovered and available as an MCP tool.
 
 ---
 
-## 📁 Project Structure
+## 🔧 Troubleshooting
 
-```
-phantomstrike/
-├── src/phantomstrike/
-│   ├── config.py              # Centralized configuration
-│   ├── main.py                # API server entry point
-│   ├── mcp/
-│   │   └── client.py          # MCP client (auto-generates tools)
-│   ├── server/
-│   │   ├── app.py             # FastAPI application
-│   │   └── routes/            # REST API endpoints
-│   ├── plugins/
-│   │   ├── base.py            # Plugin base class
-│   │   ├── registry.py        # Auto-discovery registry
-│   │   ├── network/           # nmap, rustscan, masscan
-│   │   ├── webapp/            # nuclei, gobuster, sqlmap, ffuf, nikto
-│   │   ├── osint/             # subfinder, amass
-│   │   ├── password/          # hydra
-│   │   └── cloud/             # trivy
-│   ├── execution/
-│   │   ├── runner.py          # Safe subprocess execution
-│   │   └── queue.py           # Async job queue
-│   ├── storage/
-│   │   └── database.py        # SQLite persistence
-│   └── utils/
-│       ├── logging.py         # Rich terminal output
-│       └── validation.py      # Input sanitization
-├── install.sh                 # One-line installer
-├── Dockerfile                 # Container deployment
-├── docker-compose.yml         # Docker stack
-├── pyproject.toml             # Python packaging
-└── phantomstrike-mcp.json     # MCP client configuration
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! The easiest way to contribute is by adding new tool plugins.
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/add-wpscan`
-3. Add your plugin in `src/phantomstrike/plugins/<category>/`
-4. Test it locally
-5. Submit a Pull Request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+| Problem | Fix |
+|---------|-----|
+| **Claude says "tool not found"** | Restart Claude Desktop (Cmd+Q / close fully and reopen) |
+| **"All connection attempts failed"** | Make sure the **proxy daemon** is running on your host |
+| **"Server disconnected"** in Claude settings | Check that the `command` path in your config is correct (`which phantomstrike-mcp`) |
+| **Kali tools show ⚠️ unavailable** | Install missing tools on Kali: `apt install nmap nuclei sqlmap` etc. |
+| **Scans return empty results** | Try adding `-Pn` flag (host may block ping probes) |
 
 ---
 
@@ -355,7 +348,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 PhantomStrike is a **security tool** — use it responsibly.
 
-- ⚠️ Only test systems you have **explicit permission** to test
+- ⚠️ Only test systems you have **explicit written permission** to test
 - 🔒 Run in an **isolated VM** or Docker container
 - 🚫 Never expose the API server to the public internet
 - 🔑 Always enable authentication in production
@@ -370,10 +363,9 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Built with ❤️ for the security community**
+**Built with ❤️ by [Red-Snow](https://github.com/Red-Snow) for the security community**
 
-[Report Bug](https://github.com/Red-Snow/phantomstrike/issues) •
-[Request Feature](https://github.com/Red-Snow/phantomstrike/issues) •
-[Contribute](CONTRIBUTING.md)
+[Report Bug](https://github.com/Red-Snow/phantomstrike/issues) ·
+[Request Feature](https://github.com/Red-Snow/phantomstrike/issues)
 
 </div>
