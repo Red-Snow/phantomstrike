@@ -255,27 +255,12 @@ sudo ufw allow 8443
 
 ---
 
-### Step 2 — Configure VM Networking
-
-In **VMware Fusion** (macOS): VM → Settings → Network Adapter → **Bridged** or **NAT**
-
-In **VirtualBox**: Settings → Network → Adapter 1 → **NAT** (default works) or **Bridged**
-
-Test from your host machine:
-
-```bash
-curl http://192.168.72.128:8443/health
-# Expected: {"status": "healthy", ...}
-```
-
----
-
-### Step 3 — On Your Host: Install PhantomStrike MCP Client
+### Step 2 — On Your Host: Install PhantomStrike
 
 > 💡 **Why install it twice?** 
-> In this split setup, the **Kali VM** runs the API Server (which executes the attacks), while your **Host machine** runs the MCP Client (which talks to Claude/Cursor via `stdio` and forwards the requests over HTTP to Kali). Both components are included in the same repository.
+> In this split setup, the **Kali VM** runs the API Server (which executes the attacks), while your **Host machine** runs the MCP Client. Both components are included in the same repository.
 
-**macOS**
+**macOS / Linux**
 
 ```bash
 git clone https://github.com/Red-Snow/phantomstrike.git
@@ -299,6 +284,29 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -e .
 ```
+
+---
+
+### Step 3 — Start the Proxy Daemon (Host Machine)
+
+> ⚠️ **CRITICAL FOR CLAUDE DESKTOP USERS** 
+> Claude Desktop runs MCP processes inside a strict network sandbox that blocks all outbound TCP connections. To bypass this, we run a standalone Proxy Daemon on your host that relays communication over Unix domain sockets (which are allowed by the sandbox).
+
+In a **new terminal tab** on your host machine:
+
+```bash
+cd phantomstrike
+source .venv/bin/activate        # or .venv\Scripts\Activate.ps1 on Windows
+python3 proxy_daemon.py --remote http://192.168.72.128:8443
+```
+*(Replace `192.168.72.128` with your Kali VM IP)*
+
+You should see:
+```text
+🔌 PhantomStrike Proxy Daemon running
+   Socket: /tmp/phantomstrike_proxy.sock
+```
+**Leave this terminal running.**
 
 ---
 
@@ -405,7 +413,7 @@ Edit `~/.gemini/settings.json`:
 {
   "mcpServers": {
     "phantomstrike": {
-      "command": "phantomstrike-mcp",
+      "command": "/Users/YOUR_USERNAME/phantomstrike/.venv/bin/phantomstrike-mcp",
       "args": ["--mode", "remote", "--server", "http://192.168.72.128:8443"]
     }
   }
@@ -428,9 +436,9 @@ Restart your AI agent (required after config changes), then ask:
 | Problem | Fix |
 |---|---|
 | `Connection refused` | Ensure `phantomstrike` server is running on Kali |
-| `No route to host` | Switch VM to Bridged networking mode |
+| `All connection attempts failed` | Ensure the **Proxy Daemon** is running on your Host machine |
+| `Server disconnected` | Run `which phantomstrike-mcp` on the host to get the correct config path |
 | Port 8443 blocked | Run `sudo ufw allow 8443` on Kali |
-| Wrong path in config | Run `which phantomstrike-mcp` on the host to get the correct path |
 | MCP timeout | Increase timeout in the tool — some scans take 5+ minutes |
 
 ---
@@ -515,7 +523,29 @@ pip install -e .
 
 ---
 
-### Step 4 — Configure Your AI Agent
+### Step 4 — Start the Proxy Daemon (Host Machine)
+
+> ⚠️ **CRITICAL FOR CLAUDE DESKTOP USERS** 
+> Even though Docker runs on `localhost`, Claude Desktop's network sandbox blocks TCP connections to `localhost`. You MUST run the proxy daemon to bridge the gap using Unix domain sockets.
+
+In a **new terminal tab** on your host machine:
+
+```bash
+cd phantomstrike
+source .venv/bin/activate        # or .venv\Scripts\Activate.ps1 on Windows
+python3 proxy_daemon.py --remote http://localhost:8443
+```
+
+You should see:
+```text
+🔌 PhantomStrike Proxy Daemon running
+   Socket: /tmp/phantomstrike_proxy.sock
+```
+**Leave this terminal running.**
+
+---
+
+### Step 5 — Configure Your AI Agent
 
 **Claude Desktop — macOS**
 
@@ -575,7 +605,7 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 
 ---
 
-### Step 5 — Manage the Container
+### Step 6 — Manage the Container
 
 ```bash
 # Start
