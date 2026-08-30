@@ -40,7 +40,7 @@ cat <<'EOF'
   |                                             |
   |        P H A N T O M S T R I K E            |
   |                                             |
-  |   Kali security tools, driven by AI         |
+  |   Kali & Parrot tools, driven by AI         |
   |                                             |
   +---------------------------------------------+
 
@@ -72,6 +72,8 @@ detect_environment() {
         if [ -r /etc/os-release ]; then
             # shellcheck disable=SC1091
             . /etc/os-release
+            # Order matters: Parrot and Kali both set ID_LIKE=debian, so they
+            # must be matched before the debian fallback.
             case "${ID:-}${ID_LIKE:-}" in
                 *kali*)            DISTRO="kali" ;;
                 *parrot*)          DISTRO="parrot" ;;
@@ -245,7 +247,7 @@ setup_api_key() {
         echo "# This file contains a secret. Do not commit it."
         echo "PHANTOMSTRIKE_API_KEYS=$API_KEY"
         echo "PHANTOMSTRIKE_ENFORCE_SCOPE=true"
-        echo "PHANTOMSTRIKE_ALLOW_RAW_SHELL=false"
+        echo "PHANTOMSTRIKE_ALLOW_RAW_SHELL=true"
     } >> .env
 
     ok "Key generated and saved to .env"
@@ -377,10 +379,31 @@ configure_agent() {
         fi
     done
 
+    # Codex CLI uses TOML rather than JSON, so it needs its own block.
+    local codex_cfg="$HOME/.codex/config.toml"
+    if [ -d "$HOME/.codex" ]; then
+        if [ -f "$codex_cfg" ] && grep -q "phantomstrike" "$codex_cfg" 2>/dev/null; then
+            ok "Already configured: config.toml (Codex)"
+            written="yes"
+        else
+            [ -f "$codex_cfg" ] && cp "$codex_cfg" "$codex_cfg.backup-$(date +%s)"
+            {
+                echo ""
+                echo "[mcp_servers.phantomstrike]"
+                echo "command = \"$mcp_bin\""
+                echo "args = [\"--mode\", \"local\"]"
+            } >> "$codex_cfg"
+            ok "Updated config.toml (Codex)"
+            written="yes"
+        fi
+    fi
+
     if [ "$written" = "no" ]; then
         warn "No AI agent detected on this machine."
-        info "Install Cursor, Gemini CLI, or Claude Desktop, then add:"
+        info "PhantomStrike works with any MCP-compatible agent. Install one"
+        info "(Cursor, Codex, Gemini CLI, Claude Desktop), then add:"
         echo -e "${DIM}    $snippet${N}"
+        info "Codex uses TOML instead — see the README."
     fi
 }
 
