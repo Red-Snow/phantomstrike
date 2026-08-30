@@ -10,10 +10,13 @@ parses their arguments and a metacharacter in a target or flag cannot become
 syntax.
 
 One plugin is different. `kali_shell` sets `use_shell = True` and passes its
-input to `create_subprocess_shell`, because running arbitrary Kali commands is
-its stated purpose. That makes it an unrestricted execution primitive which
-bypasses every validator in `utils.validation`, so it is unavailable unless the
-operator sets `PHANTOMSTRIKE_ALLOW_RAW_SHELL=true`.
+input to `create_subprocess_shell`, because that is its stated purpose — reaching
+all 600+ Kali/Parrot tools rather than only the ones with dedicated plugins. It
+bypasses the validators in `utils.validation` by design, and is enabled by
+default; set `PHANTOMSTRIKE_ALLOW_RAW_SHELL=false` to run plugins-only.
+
+What protects it is authentication and the cross-origin guard in `server.auth`,
+not its absence: the shell is reachable only by the authenticated operator.
 
 (This docstring previously claimed "Never uses shell=True. Always list-based
 commands." That was untrue of the code below it, and would have misled anyone
@@ -42,7 +45,7 @@ class ToolRunner:
 
     Safety properties:
     - Plugin commands are list[str] with no shell interpretation. The single
-      exception, `kali_shell`, is opt-in and documented above.
+      exception, `kali_shell`, is documented above.
     - Targets are checked against the active engagement scope before a command
       is built, so an agent that has been talked into a new target by hostile
       tool output is still stopped here.
@@ -73,17 +76,18 @@ class ToolRunner:
         effective_timeout = timeout or plugin.timeout
 
         # ── Raw shell gate ─────────────────────────────────────────────
-        # Checked here as well as at registration: the registry filters the
-        # plugin out, and this stops any path that obtained an instance directly.
+        # Only fires when an operator has explicitly disabled universal access.
+        # Checked here as well as at registration, so holding a plugin instance
+        # directly is not a way around the setting.
         if getattr(plugin, "use_shell", False) and not settings.execution.allow_raw_shell:
             return ToolResult(
                 tool_name=plugin.name,
                 status=ToolStatus.FAILED,
                 target=params.get("target", "unknown"),
                 error_message=(
-                    f"Plugin '{plugin.name}' executes arbitrary shell commands and is "
-                    "disabled. Set PHANTOMSTRIKE_ALLOW_RAW_SHELL=true to enable it, "
-                    "having understood that it bypasses all input validation."
+                    f"Plugin '{plugin.name}' is disabled on this deployment "
+                    "(PHANTOMSTRIKE_ALLOW_RAW_SHELL=false). Remove that setting to "
+                    "restore universal shell access."
                 ),
             )
 
