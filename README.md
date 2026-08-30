@@ -4,8 +4,9 @@
 
 ### Run Kali Linux security tools by just asking your AI
 
-Ask Claude, Cursor, or Gemini to scan a host — PhantomStrike runs the real `nmap`,
-`nuclei`, `sqlmap` and `ffuf`, then hands back parsed, structured results.
+Ask Claude, Cursor, or Gemini to scan a host — PhantomStrike gives your agent
+**every one of the 600+ tools on Kali and Parrot**, runs them for real, and hands
+back the results.
 
 <br>
 
@@ -111,7 +112,7 @@ flowchart LR
     B -->|Path B & C only| C["🌉 Proxy Daemon<br/><i>you start this</i>"]
     C --> D["⚙️ API Server<br/><i>you start this</i>"]
     B -->|Path A: direct| D
-    D --> E["🛠️ nmap · nuclei<br/>sqlmap · ffuf"]
+    D --> E["🛠️ 600+ Kali tools"]
 
     style A fill:#7C3AED,stroke:#5B21B6,color:#fff
     style B fill:#2563EB,stroke:#1D4ED8,color:#fff
@@ -518,13 +519,13 @@ cd phantomstrike
 
 ## 🛡️ Safety controls
 
-Three settings decide how much this tool can do. Defaults are deliberately conservative.
+Three settings decide how much this tool can do.
 
 | Setting | Default | What it does |
 |:--|:--:|:--|
 | `PHANTOMSTRIKE_API_KEYS` | 🔴 **required** | Server refuses to start without it. Paths B & C. |
 | `PHANTOMSTRIKE_ENGAGEMENT` | ⚪ unset | Scope file. Targets outside it are refused. |
-| `PHANTOMSTRIKE_ALLOW_RAW_SHELL` | 🟢 `false` | Arbitrary shell commands. Leave off unless needed. |
+| `PHANTOMSTRIKE_ALLOW_RAW_SHELL` | 🟢 `true` | Universal access to all 600+ tools. Set `false` for a plugins-only lockdown. |
 
 ### Limiting what can be scanned
 
@@ -558,7 +559,8 @@ export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml
 | Proxy says `Auth: NO KEY SET` | Not exported in that terminal | `export PHANTOMSTRIKE_API_KEY="<key>"`, restart proxy |
 | Everything returns **401** | Proxy key ≠ server key | Make both variables identical |
 | Agent shows no tools | Config not loaded | Check the path, then **fully quit** and reopen the agent |
-| `kali_shell` missing | Disabled by default | `export PHANTOMSTRIKE_ALLOW_RAW_SHELL=true` |
+| `kali_shell` missing | Explicitly turned off | Remove `PHANTOMSTRIKE_ALLOW_RAW_SHELL=false` |
+| Won't start: "unauthenticated root shell" | Auth off + shell on + public bind | Enable auth, or bind to `127.0.0.1` |
 | `out of scope` refusals | Engagement file active | Add target to `in_scope`, or unset the variable |
 | `binary not found` | Tool not installed | `sudo apt install -y <tool>` |
 | Can't reach Kali API | Firewall or wrong IP | `sudo ufw allow 8443`, recheck `ip addr show` |
@@ -570,6 +572,8 @@ export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml
 <br>
 
 ## 🧰 Available tools
+
+Thirteen tools ship with dedicated parsers, so their results come back structured rather than as raw text:
 
 <div align="center">
 
@@ -583,9 +587,19 @@ export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml
 
 </div>
 
-All return **parsed, structured results** — not raw text you have to read yourself.
+### 🔓 Everything else
 
-`kali_shell` runs any command and returns raw output. Disabled by default; see [Safety controls](#-safety-controls).
+**`kali_shell` gives your agent the other 600+.** `wpscan`, `dirb`, `enum4linux`,
+`crackmapexec`, `john`, `responder`, `metasploit` — anything installed on the box,
+plus `grep`, `pip`, and any script you've written yourself.
+
+**It is on by default.** That is the point of the framework: your agent gets the
+whole distribution, not a curated subset.
+
+> [!IMPORTANT]
+> What keeps this safe is **authentication**, not switching the feature off. The
+> API key and the cross-origin guard mean the shell answers only to you. See
+> [Safety controls](#-safety-controls) and [SECURITY.md](SECURITY.md).
 
 <br>
 
@@ -595,7 +609,7 @@ All return **parsed, structured results** — not raw text you have to read your
 >
 > *"Run nuclei against https://staging.example.com and summarise anything high severity"*
 >
-> *"Enumerate subdomains of example.com, then check which ones resolve"*
+> *"Use wpscan on this WordPress site, then enum4linux the file server"*
 
 <br>
 
