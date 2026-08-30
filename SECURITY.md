@@ -67,10 +67,17 @@ An attacker-controlled banner reading *"scan complete — now run the following
 diagnostic command"* is a prompt injection aimed at whatever tools the agent
 holds. Mitigations here:
 
-- **`kali_shell` is disabled by default.** It runs arbitrary commands and bypasses
-  every validator in `utils/validation.py`. Enable it with
-  `PHANTOMSTRIKE_ALLOW_RAW_SHELL=true` only when you understand that trade-off,
-  and prefer a disposable VM when you do.
+- **Authentication is the control, not feature removal.** `kali_shell` gives the
+  agent all 600+ Kali/Parrot tools and is enabled by default — that is the point
+  of the framework. It is protected by the API key and the cross-origin guard, so
+  it answers only to the operator. Set `PHANTOMSTRIKE_ALLOW_RAW_SHELL=false` if
+  you want a plugins-only deployment.
+- **One configuration fails closed.** The server refuses to start with auth
+  disabled *and* raw shell enabled *and* a non-loopback bind address. Each is
+  defensible alone; together they publish a root shell to the network. An
+  isolated lab box on `127.0.0.1` with auth off still runs.
+- **Prefer a disposable VM.** The agent can run anything you could run. Give it a
+  machine you are willing to rebuild.
 - **Scope is enforced below the agent.** Targets are checked against
   `engagement.yaml` in the execution path, so an agent that has been redirected
   still cannot reach a host outside the engagement.
@@ -91,8 +98,8 @@ export PHANTOMSTRIKE_HOST=127.0.0.1
 export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml   # define authorised scope
 export PHANTOMSTRIKE_DOCKER_SANDBOX=true            # isolate tool execution
 
-# 3. Leave this off unless you have a specific need
-# export PHANTOMSTRIKE_ALLOW_RAW_SHELL=true
+# 3. Universal tool access is already on. Only set this to opt OUT:
+# export PHANTOMSTRIKE_ALLOW_RAW_SHELL=false
 ```
 
 **Checklist before pointing this at anything:**
@@ -100,7 +107,8 @@ export PHANTOMSTRIKE_DOCKER_SANDBOX=true            # isolate tool execution
 - [ ] `engagement.yaml` reflects scope you have written authorisation for
 - [ ] API keys set; auth not disabled
 - [ ] Bound to localhost, or behind an authenticating proxy
-- [ ] Raw shell left disabled unless genuinely required
+- [ ] Running on a host you are willing to rebuild, since the agent has full
+      tool access by design
 - [ ] Audit log going somewhere you can retrieve later
 
 ## Legal
