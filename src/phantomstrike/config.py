@@ -66,10 +66,41 @@ class ExecutionConfig:
     workspace_dir: str = "/tmp/phantomstrike"
     cache_enabled: bool = True
     cache_ttl: int = 3600  # 1 hour
-    # SECURITY: the kali_shell plugin accepts an arbitrary command string and is
-    # therefore a deliberate, unrestricted RCE primitive. It bypasses every
-    # validator in utils/validation.py, so it stays off unless explicitly enabled.
-    allow_raw_shell: bool = False
+    # Universal shell access (the kali_shell plugin) is the core feature: it is
+    # what makes all 600+ Kali/Parrot tools reachable rather than only the ~13
+    # with dedicated plugins. It is ON by default.
+    #
+    # The vulnerability this project had was never that this plugin existed. It
+    # was that the API required no authentication and reflected any browser
+    # origin, so *anyone* could reach it. With auth enforced and cross-origin
+    # requests refused, the shell is reachable only by the authenticated
+    # operator — which is exactly who it is for.
+    #
+    # Set false to run tool-plugins-only on a locked-down deployment.
+    allow_raw_shell: bool = True
+
+    def validate(self, auth_enabled: bool, host: str) -> None:
+        """
+        Refuse the one combination that is catastrophic rather than merely risky.
+
+        Universal shell access is the point of this tool and is on by default.
+        Unauthenticated access is a supported choice for an isolated lab box.
+        But all three of: no auth, raw shell, and a non-loopback bind address
+        means anyone who can route to the port gets a root shell. That is not a
+        configuration anyone chooses deliberately, so it fails closed.
+        """
+        loopback = {"127.0.0.1", "localhost", "::1"}
+        if not auth_enabled and self.allow_raw_shell and host not in loopback:
+            raise RuntimeError(
+                f"Refusing to start: authentication is disabled, arbitrary shell "
+                f"execution is enabled, and the server is bound to {host!r}.\n"
+                "That combination exposes an unauthenticated root shell to the "
+                "network.\n"
+                "Pick one:\n"
+                "  - enable auth:        PHANTOMSTRIKE_AUTH_ENABLED=true (recommended)\n"
+                "  - bind to localhost:  PHANTOMSTRIKE_HOST=127.0.0.1\n"
+                "  - disable raw shell:  PHANTOMSTRIKE_ALLOW_RAW_SHELL=false"
+            )
 
 
 @dataclass
@@ -154,8 +185,9 @@ class PhantomStrikeConfig:
         config.execution.workspace_dir = os.getenv(
             "PHANTOMSTRIKE_WORKSPACE", config.execution.workspace_dir
         )
+        # Defaults to enabled; set explicitly to "false" to disable.
         config.execution.allow_raw_shell = (
-            os.getenv("PHANTOMSTRIKE_ALLOW_RAW_SHELL", "").lower() == "true"
+            os.getenv("PHANTOMSTRIKE_ALLOW_RAW_SHELL", "true").lower() != "false"
         )
 
         # Engagement scope
