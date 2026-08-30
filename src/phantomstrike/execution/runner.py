@@ -1,8 +1,23 @@
 """
-PhantomStrike Tool Runner — safe subprocess execution with streaming.
+PhantomStrike Tool Runner — subprocess execution with streaming.
 
-Handles the actual process lifecycle: spawn → stream → capture → return.
-Never uses shell=True. Always list-based commands.
+Handles the process lifecycle: spawn → stream → capture → return.
+
+Execution model
+---------------
+Tool plugins run through `create_subprocess_exec` with a list argv, so no shell
+parses their arguments and a metacharacter in a target or flag cannot become
+syntax.
+
+One plugin is different. `kali_shell` sets `use_shell = True` and passes its
+input to `create_subprocess_shell`, because running arbitrary Kali commands is
+its stated purpose. That makes it an unrestricted execution primitive which
+bypasses every validator in `utils.validation`, so it is unavailable unless the
+operator sets `PHANTOMSTRIKE_ALLOW_RAW_SHELL=true`.
+
+(This docstring previously claimed "Never uses shell=True. Always list-based
+commands." That was untrue of the code below it, and would have misled anyone
+auditing this file.)
 """
 
 from __future__ import annotations
@@ -12,18 +27,26 @@ import time
 from datetime import datetime, timezone
 from typing import AsyncIterator, Optional
 
+from phantomstrike.config import settings
+from phantomstrike.engagement import ScopeViolation, enforce as enforce_scope
 from phantomstrike.plugins.base import BaseToolPlugin, ToolResult, ToolStatus
 from phantomstrike.utils.logging import get_logger
 
 log = get_logger("runner")
+audit = get_logger("audit")
 
 
 class ToolRunner:
     """
     Execute tool commands as async subprocesses.
 
-    Key safety properties:
-    - Commands are list[str] — no shell interpretation.
+    Safety properties:
+    - Plugin commands are list[str] with no shell interpretation. The single
+      exception, `kali_shell`, is opt-in and documented above.
+    - Targets are checked against the active engagement scope before a command
+      is built, so an agent that has been talked into a new target by hostile
+      tool output is still stopped here.
+    - Every execution is written to the audit log with its target and command.
     - Timeout enforcement per execution.
     - stdout/stderr streamed line-by-line for real-time monitoring.
     """
@@ -48,6 +71,40 @@ class ToolRunner:
             Structured ToolResult.
         """
         effective_timeout = timeout or plugin.timeout
+
+        # ── Raw shell gate ─────────────────────────────────────────────
+        # Checked here as well as at registration: the registry filters the
+        # plugin out, and this stops any path that obtained an instance directly.
+        if getattr(plugin, "use_shell", False) and not settings.execution.allow_raw_shell:
+            return ToolResult(
+                tool_name=plugin.name,
+                status=ToolStatus.FAILED,
+                target=params.get("target", "unknown"),
+                error_message=(
+                    f"Plugin '{plugin.name}' executes arbitrary shell commands and is "
+                    "disabled. Set PHANTOMSTRIKE_ALLOW_RAW_SHELL=true to enable it, "
+                    "having understood that it bypasses all input validation."
+                ),
+            )
+
+        # ── Engagement scope ───────────────────────────────────────────
+        # Before the command is built, so an out-of-scope target never reaches
+        # argv construction. No-op when the session is unscoped.
+        raw_target = str(params.get("target", "") or "")
+        if raw_target and settings.engagement.enforce:
+            try:
+                enforce_scope(raw_target)
+            except ScopeViolation as violation:
+                audit.warning(
+                    f"BLOCKED out-of-scope execution | tool={plugin.name} "
+                    f"target={raw_target} reason={violation.reason}"
+                )
+                return ToolResult(
+                    tool_name=plugin.name,
+                    status=ToolStatus.FAILED,
+                    target=raw_target,
+                    error_message=f"Refused: {violation}",
+                )
 
         # Validate input schema
         try:
@@ -74,6 +131,14 @@ class ToolRunner:
         cmd_str = " ".join(command)
         target = params.get("target", "unknown")
         log.info(f"[tool]{plugin.name}[/tool] → executing: {cmd_str[:120]}")
+
+        # Audit trail. An operator asked to justify a scan needs a record of what
+        # ran against which host and when — separate from the debug log, and
+        # written before execution so it survives a crash mid-run.
+        audit.info(
+            f"EXEC tool={plugin.name} target={target} shell={getattr(plugin, 'use_shell', False)} "
+            f"command={cmd_str}"
+        )
 
         started_at = datetime.now(timezone.utc)
         start_time = time.monotonic()
