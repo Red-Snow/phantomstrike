@@ -32,28 +32,17 @@ back the results.
 
 One command. It installs the tools, sets up Python, generates your API key, configures your AI agent, and writes a start script.
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**🐧 Linux · Kali · Parrot · macOS**
+#### 🐧 Linux · Kali · Parrot · macOS
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash
 ```
 
-</td>
-<td width="50%" valign="top">
-
-**🪟 Windows (PowerShell)**
+#### 🪟 Windows (PowerShell)
 
 ```powershell
 irm https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.ps1 | iex
 ```
-
-</td>
-</tr>
-</table>
 
 > [!TIP]
 > **Safe to run again.** Re-running keeps your existing key and skips anything already done. If a step fails, fix the cause and run it again — you never need to start over.
@@ -478,10 +467,7 @@ docker compose up -d --build   # rebuild after code changes
 
 ### If you used the setup script
 
-<table>
-<tr><td width="50%">
-
-**🐧 Linux / macOS**
+#### 🐧 Linux / macOS
 
 ```bash
 cd phantomstrike
@@ -490,9 +476,7 @@ cd phantomstrike
 ./start.sh proxy      # start the bridge
 ```
 
-</td><td width="50%">
-
-**🪟 Windows**
+#### 🪟 Windows
 
 ```powershell
 cd phantomstrike
@@ -500,9 +484,6 @@ cd phantomstrike
 .\start.ps1 -Mode server
 .\start.ps1            # proxy
 ```
-
-</td></tr>
-</table>
 
 ### If you set up manually
 
