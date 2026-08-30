@@ -9,9 +9,14 @@ in this file fails, a real vulnerability has been reintroduced.
   test_browser_origin_is_rejected        drive-by RCE from any visited website
   test_wildcard_cors_is_refused          wildcard origin config
   test_auth_enabled_without_keys_fails   auth that looks on but accepts anyone
-  test_raw_shell_disabled_by_default     arbitrary command execution by default
+  test_unauthenticated_network_shell_*   unauthenticated root shell on a network
   test_error_response_hides_internals    exception text leaked to the caller
   test_scope_* / test_engagement_*       unscoped scanning of arbitrary hosts
+
+One test guards the opposite direction: test_raw_shell_available_by_default
+fails if universal shell access is ever removed. Reaching all 600+ Kali/Parrot
+tools is the point of the project, and a security change should not quietly
+delete the feature it was meant to protect.
 """
 
 from __future__ import annotations
@@ -162,42 +167,74 @@ def test_wildcard_cors_is_refused(monkeypatch):
     importlib.reload(config_module)
 
 
-# ── Raw shell gating ──────────────────────────────────────────────────
+# ── Universal shell access ─────────────────────────────────────────────
 
 
-def test_raw_shell_disabled_by_default(monkeypatch):
+def test_raw_shell_available_by_default(monkeypatch):
     """
-    kali_shell must not be registered without an explicit opt-in.
+    Universal shell access is the product, and must be on by default.
 
-    It accepts an arbitrary command string and bypasses every validator in
-    utils.validation.
+    kali_shell is what makes all 600+ Kali/Parrot tools reachable rather than
+    only the ones with dedicated plugins. Removing it would gut the tool. What
+    protects it is authentication and the origin guard, not its absence.
     """
     app = _build_app(monkeypatch)
     with TestClient(app) as client:
         response = client.get("/api/tools", headers={"X-API-Key": API_KEY})
     names = [p["name"] for p in response.json().get("plugins", [])]
-    assert "kali_shell" not in names, (
-        "kali_shell is exposed without PHANTOMSTRIKE_ALLOW_RAW_SHELL — "
-        "arbitrary command execution is available by default"
+    assert "kali_shell" in names, (
+        "kali_shell is missing by default — universal tool access is broken"
     )
 
 
-def test_raw_shell_available_when_opted_in(monkeypatch):
-    """The opt-in must actually work, or operators will disable auth instead."""
-    app = _build_app(monkeypatch, PHANTOMSTRIKE_ALLOW_RAW_SHELL="true")
+def test_raw_shell_can_be_disabled(monkeypatch):
+    """Locked-down deployments must still be able to run plugins-only."""
+    app = _build_app(monkeypatch, PHANTOMSTRIKE_ALLOW_RAW_SHELL="false")
     with TestClient(app) as client:
         response = client.get("/api/tools", headers={"X-API-Key": API_KEY})
     names = [p["name"] for p in response.json().get("plugins", [])]
-    assert "kali_shell" in names
+    assert "kali_shell" not in names
+
+
+def test_unauthenticated_network_shell_is_refused(monkeypatch):
+    """
+    The one catastrophic combination must fail closed.
+
+    Auth off + raw shell on + bound to a non-loopback address is an
+    unauthenticated root shell reachable from the network. Each ingredient is a
+    legitimate choice alone; together they are not.
+    """
+    monkeypatch.setenv("PHANTOMSTRIKE_AUTH_ENABLED", "false")
+    monkeypatch.setenv("PHANTOMSTRIKE_HOST", "0.0.0.0")
+    monkeypatch.delenv("PHANTOMSTRIKE_ALLOW_RAW_SHELL", raising=False)
+    importlib.reload(config_module)
+
+    with pytest.raises(RuntimeError, match="unauthenticated root shell"):
+        config_module.settings.execution.validate(
+            config_module.settings.auth.enabled,
+            config_module.settings.server.host,
+        )
+
+
+def test_unauthenticated_shell_on_localhost_is_allowed(monkeypatch):
+    """An isolated lab box on loopback is a legitimate setup and must still work."""
+    monkeypatch.setenv("PHANTOMSTRIKE_AUTH_ENABLED", "false")
+    monkeypatch.setenv("PHANTOMSTRIKE_HOST", "127.0.0.1")
+    importlib.reload(config_module)
+
+    config_module.settings.execution.validate(
+        config_module.settings.auth.enabled,
+        config_module.settings.server.host,
+    )
 
 
 @pytest.mark.asyncio
 async def test_runner_refuses_shell_plugin_when_disabled(monkeypatch):
     """
-    Defence in depth: even holding a plugin instance directly, the runner must
-    refuse to execute it while the opt-in is off.
+    Defence in depth: with the shell explicitly disabled, holding a plugin
+    instance directly must not be a way around it.
     """
-    monkeypatch.delenv("PHANTOMSTRIKE_ALLOW_RAW_SHELL", raising=False)
+    monkeypatch.setenv("PHANTOMSTRIKE_ALLOW_RAW_SHELL", "false")
     importlib.reload(config_module)
 
     from phantomstrike.execution import runner as runner_module

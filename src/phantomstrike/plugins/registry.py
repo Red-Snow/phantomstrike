@@ -35,18 +35,19 @@ class PluginRegistry:
         """
         Register a single plugin instance.
 
-        Plugins marked `requires_raw_shell_optin` execute arbitrary commands and
-        are skipped unless the operator enabled them. Filtering at registration
-        keeps them out of the REST listing, the MCP tool schema and the agent's
-        menu entirely — an agent cannot request a tool it never sees.
+        Plugins marked `requires_raw_shell_optin` provide universal shell access.
+        That is on by default; when an operator turns it off for a locked-down
+        deployment, filtering here keeps the plugin out of the REST listing and
+        the MCP tool schema entirely — an agent cannot request a tool it never
+        sees.
         """
         if getattr(plugin, "requires_raw_shell_optin", False):
             from phantomstrike.config import settings
 
             if not settings.execution.allow_raw_shell:
                 log.info(
-                    f"Skipping plugin '{plugin.name}' — arbitrary command execution is "
-                    "disabled (set PHANTOMSTRIKE_ALLOW_RAW_SHELL=true to enable)"
+                    f"Skipping plugin '{plugin.name}' — disabled by "
+                    "PHANTOMSTRIKE_ALLOW_RAW_SHELL=false"
                 )
                 return
 
