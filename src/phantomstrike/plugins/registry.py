@@ -29,10 +29,27 @@ class PluginRegistry:
     def __init__(self):
         self._plugins: dict[str, BaseToolPlugin] = {}
 
-    # ── Registration ──────────────────────────────────────────────────────────
+    # ── Registration ────────────────────────────────────────────────────
 
     def register(self, plugin: BaseToolPlugin) -> None:
-        """Register a single plugin instance."""
+        """
+        Register a single plugin instance.
+
+        Plugins marked `requires_raw_shell_optin` execute arbitrary commands and
+        are skipped unless the operator enabled them. Filtering at registration
+        keeps them out of the REST listing, the MCP tool schema and the agent's
+        menu entirely — an agent cannot request a tool it never sees.
+        """
+        if getattr(plugin, "requires_raw_shell_optin", False):
+            from phantomstrike.config import settings
+
+            if not settings.execution.allow_raw_shell:
+                log.info(
+                    f"Skipping plugin '{plugin.name}' — arbitrary command execution is "
+                    "disabled (set PHANTOMSTRIKE_ALLOW_RAW_SHELL=true to enable)"
+                )
+                return
+
         if plugin.name in self._plugins:
             log.warning(f"Plugin '{plugin.name}' already registered — overwriting")
         self._plugins[plugin.name] = plugin
@@ -75,15 +92,20 @@ class PluginRegistry:
                             and attr is not BaseToolPlugin
                             and attr.name  # Must have a name set
                         ):
+                            before = len(self._plugins)
                             self.register(attr())
-                            count += 1
+                            # Count what was actually registered. register() can
+                            # decline a plugin (opt-in gated), and reporting a
+                            # skipped plugin as loaded would misstate what the
+                            # server is exposing.
+                            count += len(self._plugins) - before
                 except Exception as e:
                     log.warning(f"Failed to load plugin module {module_path}: {e}")
 
         log.info(f"Auto-discovery complete: {count} plugins registered")
         return count
 
-    # ── Lookups ───────────────────────────────────────────────────────────────
+    # ── Lookups ────────────────────────────────────────────────────────
 
     def get(self, name: str) -> Optional[BaseToolPlugin]:
         """Get a plugin by name."""
@@ -105,7 +127,7 @@ class PluginRegistry:
         """Get all registered plugin names."""
         return list(self._plugins.keys())
 
-    # ── Info ──────────────────────────────────────────────────────────────────
+    # ── Info ──────────────────────────────────────────────────────────
 
     def summary(self) -> dict:
         """Return a summary of all registered plugins."""
@@ -130,5 +152,5 @@ class PluginRegistry:
         return name in self._plugins
 
 
-# ── Global singleton ──────────────────────────────────────────────────────────
+# ── Global singleton ──────────────────────────────────────────────────
 registry = PluginRegistry()

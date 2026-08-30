@@ -1,50 +1,87 @@
 """
-Universal Shell Plugin — allows arbitrary command execution.
-"""
+Universal shell plugin — arbitrary command execution.
 
-from typing import Any
+Read this before enabling it
+----------------------------
+This plugin is not a scanner wrapper. It takes a command string and hands it to
+a shell. It bypasses `utils.validation` entirely: the target parsing, port
+validation and shell-metacharacter blocklist that protect every other plugin do
+not apply here, because running whatever is passed in is the whole point.
+
+It is therefore disabled unless the operator sets:
+
+    PHANTOMSTRIKE_ALLOW_RAW_SHELL=true
+
+Two properties of the surrounding system make that the right default:
+
+  * The API is reachable from the operator's browser. Localhost is not a
+    boundary — without the origin guard in `server.auth`, a page in any open tab
+    could drive this plugin.
+
+  * The caller is usually an LLM agent whose decisions are shaped by tool output,
+    and tool output comes from the target being scanned. A host that plants
+    instructions in a service banner or an HTTP response is talking directly to
+    the agent holding this shell. Enabling it is a decision about that threat,
+    not a convenience toggle.
+
+When enabled, run it against a disposable VM or container rather than a host you
+care about, and keep `PHANTOMSTRIKE_ENGAGEMENT` set so commands are still
+recorded against an authorised scope.
+"""
 
 from pydantic import BaseModel, Field
 
-from phantomstrike.plugins.base import BaseToolPlugin, Finding, Severity, ToolCategory, ToolResult, ToolStatus
+from phantomstrike.plugins.base import BaseToolPlugin, ToolCategory, ToolResult, ToolStatus
 
 
 class KaliShellPlugin(BaseToolPlugin):
-    """Universal plugin to run any Kali Linux command."""
+    """Run an arbitrary command on the host. Opt-in — see module docstring."""
 
     name = "kali_shell"
-    category = ToolCategory.OSINT  # Putting it in OSINT or generic
+    category = ToolCategory.OSINT
     description = (
-        "Universal shell execution tool. Use this to run ANY command on the Kali VM "
-        "(e.g., wpscan, dirb, grep, pip, etc.). Returns raw stdout and stderr."
+        "Arbitrary shell execution on the PhantomStrike host. Runs ANY command "
+        "(wpscan, dirb, grep, pip …) and returns raw stdout and stderr. "
+        "DANGEROUS: no input validation is applied. Disabled unless "
+        "PHANTOMSTRIKE_ALLOW_RAW_SHELL=true."
     )
     required_binaries = ["bash"]
-    version = "1.0.0"
-    timeout = 1800  # 30 minutes for arbitrary commands
+    version = "1.1.0"
+    timeout = 1800  # 30 minutes for long-running commands
     use_shell = True
 
+    #: Marks this plugin as an unrestricted execution primitive. The registry
+    #: will not register it, and the runner will not run it, unless the operator
+    #: has explicitly opted in.
+    requires_raw_shell_optin = True
+
     class InputSchema(BaseModel):
-        command: str = Field(..., description="The full bash command to execute (e.g. 'wpscan --url http://target.com')")
-        target: str = Field("localhost", description="Optional target identifier for the database record")
+        command: str = Field(
+            ...,
+            description="Full bash command to execute, e.g. 'wpscan --url http://target'",
+        )
+        target: str = Field(
+            "localhost",
+            description=(
+                "Host this command acts against. Recorded in the audit log and "
+                "checked against the engagement scope — set it accurately."
+            ),
+        )
 
     def build_command(self, params: BaseModel) -> list[str]:
-        # Because use_shell = True, the runner expects a single string or a list where the first element is the string.
-        # We return it as a list with one item for the runner.py logic to do `cmd_str = " ".join(command)`.
-        # Wait, runner.py does `cmd_str = " ".join(command)` and then passes `cmd_str` to `create_subprocess_shell`.
-        # So returning `[params.command]` works perfectly.
+        """
+        Return the command as a single-element list.
+
+        `ToolRunner` joins the list and passes the resulting string to
+        `create_subprocess_shell` when `use_shell` is set.
+        """
         return [params.command]
 
     def parse_output(self, stdout: str, stderr: str, exit_code: int) -> ToolResult:
-        """
-        We don't try to parse 600 different tool formats.
-        We just return the raw text and let Claude read it from the ToolResult!
-        """
-        # If there's an obvious error but exit_code is 0 (some tools do this), flag it
-        status = ToolStatus.SUCCESS if exit_code == 0 else ToolStatus.FAILED
-
+        """Return raw output — arbitrary commands have no parseable shape."""
         return ToolResult(
             tool_name=self.name,
-            status=status,
-            target="",  # Overridden by runner
+            status=ToolStatus.SUCCESS if exit_code == 0 else ToolStatus.FAILED,
+            target="",  # Populated by the runner
             parsed_data={"raw_output": stdout, "raw_error": stderr},
         )

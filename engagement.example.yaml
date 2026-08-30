@@ -1,0 +1,36 @@
+# PhantomStrike engagement scope
+# ------------------------------------------------------------------------------
+# Copy to engagement.yaml, fill in, and point the server at it:
+#
+#     export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml
+#
+# Every target is checked against this file before a command is built. The check
+# runs in the execution path, below the agent — so if an LLM is talked into a new
+# target by something it read in a scan result, it still cannot reach a host you
+# were not authorised to test.
+#
+# Without this file the server runs unscoped and logs a warning at startup.
+
+# Who authorised the work. Recorded for the audit trail; not used for matching.
+client: Example Corp
+reference: PT-2026-014
+authorised_by: security@example.com
+
+# Hosts you ARE authorised to test.
+# Accepts: CIDR ranges, exact IPs, hostnames, and wildcard domains.
+in_scope:
+  - 10.10.0.0/16
+  - 192.168.50.0/24
+  - "*.staging.example.com"
+  - app.example.com
+
+# Carve-outs that win over anything in in_scope. Put the production database,
+# the shared jump host, and anything the client told you to leave alone here.
+out_of_scope:
+  - 10.10.99.0/24
+  - db-primary.example.com
+
+# Optional testing window (ISO 8601, UTC). Outside it, execution is refused.
+# Useful when the client authorised a specific maintenance slot.
+starts_at: 2026-09-01T00:00:00Z
+ends_at: 2026-09-14T23:59:59Z
