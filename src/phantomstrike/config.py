@@ -18,7 +18,11 @@ class ServerConfig:
     port: int = 8443
     workers: int = 1
     reload: bool = False
-    cors_origins: list[str] = field(default_factory=lambda: ["*"])
+    # SECURITY: empty by default. This API executes commands, so no browser
+    # origin should be able to reach it. A wildcard here combined with
+    # credentialed requests turns every page the operator visits into a
+    # remote shell on this host.
+    cors_origins: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -34,6 +38,23 @@ class AuthConfig:
         if not self.secret_key:
             self.secret_key = os.getenv("PHANTOMSTRIKE_SECRET_KEY", secrets.token_hex(32))
 
+    def validate(self) -> None:
+        """
+        Fail closed at startup.
+
+        Auth switched on with no credentials configured is worse than no auth at
+        all, because it reads as protected while accepting every request. Refuse
+        to start rather than serve an execution API to anyone who asks.
+        """
+        if self.enabled and not self.api_keys:
+            raise RuntimeError(
+                "Authentication is enabled but no API keys are configured.\n"
+                '  Generate one:  python -c "import secrets; print(secrets.token_urlsafe(32))"\n'
+                "  Then set:      PHANTOMSTRIKE_API_KEYS=<key>\n"
+                "To run unauthenticated (isolated lab hosts only), set "
+                "PHANTOMSTRIKE_AUTH_ENABLED=false explicitly."
+            )
+
 
 @dataclass
 class ExecutionConfig:
@@ -45,6 +66,23 @@ class ExecutionConfig:
     workspace_dir: str = "/tmp/phantomstrike"
     cache_enabled: bool = True
     cache_ttl: int = 3600  # 1 hour
+    # SECURITY: the kali_shell plugin accepts an arbitrary command string and is
+    # therefore a deliberate, unrestricted RCE primitive. It bypasses every
+    # validator in utils/validation.py, so it stays off unless explicitly enabled.
+    allow_raw_shell: bool = False
+
+
+@dataclass
+class EngagementConfig:
+    """
+    Authorised scope for this session.
+
+    Security tooling that will scan whatever it is pointed at is a liability for
+    its operator. When an engagement file is loaded, every target is checked
+    against it before a command is built.
+    """
+    file: Optional[str] = None
+    enforce: bool = True
 
 
 @dataclass
@@ -76,6 +114,7 @@ class PhantomStrikeConfig:
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
     database: DatabaseConfig = field(default_factory=DatabaseConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    engagement: EngagementConfig = field(default_factory=EngagementConfig)
 
     @classmethod
     def from_env(cls) -> "PhantomStrikeConfig":
@@ -86,6 +125,16 @@ class PhantomStrikeConfig:
         config.server.host = os.getenv("PHANTOMSTRIKE_HOST", config.server.host)
         config.server.port = int(os.getenv("PHANTOMSTRIKE_PORT", str(config.server.port)))
         config.server.reload = os.getenv("PHANTOMSTRIKE_RELOAD", "").lower() == "true"
+        # Comma-separated exact origins. "*" is rejected — see ServerConfig.
+        if cors_env := os.getenv("PHANTOMSTRIKE_CORS_ORIGINS"):
+            origins = [o.strip() for o in cors_env.split(",") if o.strip()]
+            if "*" in origins:
+                raise RuntimeError(
+                    "PHANTOMSTRIKE_CORS_ORIGINS=* is not permitted. This API executes "
+                    "commands; a wildcard origin lets any website the operator visits "
+                    "drive it. List exact origins instead."
+                )
+            config.server.cors_origins = origins
 
         # Auth
         config.auth.enabled = os.getenv("PHANTOMSTRIKE_AUTH_ENABLED", "true").lower() == "true"
@@ -104,6 +153,15 @@ class PhantomStrikeConfig:
         )
         config.execution.workspace_dir = os.getenv(
             "PHANTOMSTRIKE_WORKSPACE", config.execution.workspace_dir
+        )
+        config.execution.allow_raw_shell = (
+            os.getenv("PHANTOMSTRIKE_ALLOW_RAW_SHELL", "").lower() == "true"
+        )
+
+        # Engagement scope
+        config.engagement.file = os.getenv("PHANTOMSTRIKE_ENGAGEMENT")
+        config.engagement.enforce = (
+            os.getenv("PHANTOMSTRIKE_ENFORCE_SCOPE", "true").lower() == "true"
         )
 
         # Database
