@@ -8,8 +8,13 @@ This service executes system commands. It is treated accordingly:
   * Every route that executes tools or discloses job data requires an API key.
   * Cross-origin browser requests are rejected outright. Binding to localhost is
     not isolation — every page in the operator's browser can reach 127.0.0.1.
-  * Startup fails closed if authentication is enabled without configured keys.
+  * Startup fails closed if authentication is enabled without configured keys,
+    or if an unauthenticated shell would be exposed to the network.
   * Unhandled exceptions return an opaque reference id, never internal detail.
+
+Universal shell access is ON by default: reaching all 600+ Kali/Parrot tools is
+the purpose of this framework. It is protected by authentication, not by being
+switched off.
 """
 
 from __future__ import annotations
@@ -41,6 +46,7 @@ async def lifespan(app: FastAPI):
     # Fail closed before binding a port. An execution API that advertises
     # authentication but accepts every caller should not start at all.
     settings.auth.validate()
+    settings.execution.validate(settings.auth.enabled, settings.server.host)
 
     if settings.engagement.file:
         load_active(settings.engagement.file)
@@ -56,16 +62,18 @@ async def lifespan(app: FastAPI):
             "tools on this host."
         )
     if settings.execution.allow_raw_shell:
-        log.warning(
-            "Raw shell plugin is ENABLED. kali_shell accepts arbitrary commands "
-            "and bypasses every input validator."
+        log.info(
+            "Universal shell enabled — all Kali/Parrot tools are reachable via "
+            "kali_shell. Access is gated by API key and the cross-origin guard."
         )
+    else:
+        log.info("Universal shell disabled — only tool plugins are exposed.")
 
     await init_db()
     count = registry.auto_discover()
     log.info(f"Loaded {count} tool plugins")
     yield
-    # ── Shutdown ──────────────────────────────────────────────────────────
+    # ── Shutdown ─────────────────────────────────────────────────────────
     log.info("PhantomStrike server shutting down")
 
 
