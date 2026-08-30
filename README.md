@@ -2,9 +2,9 @@
 
 # ⚡ PhantomStrike
 
-### Run Kali Linux security tools by just asking your AI
+### Run Kali &amp; Parrot security tools by just asking your AI
 
-Ask Claude, Cursor, or Gemini to scan a host — PhantomStrike gives your agent
+Ask Claude, Codex, Cursor, or Gemini to scan a host — PhantomStrike gives your agent
 **every one of the 600+ tools on Kali and Parrot**, runs them for real, and hands
 back the results.
 
@@ -61,7 +61,7 @@ Then restart your AI agent and ask it:
 3. Creates a Python virtual environment and installs PhantomStrike
 4. **Generates your API key** and saves it to `.env` — which is gitignored, so it can never be committed
 5. **Writes `start.sh`** so restarting later is one command
-6. Configures Cursor / Gemini CLI / Claude Desktop — only the ones you actually have installed, and it backs up any existing config rather than overwriting other MCP servers
+6. Configures Cursor / Codex / Gemini CLI / Claude Desktop — only the ones you actually have installed, and it backs up any existing config rather than overwriting other MCP servers
 
 It never overwrites your work and it never commits your key.
 
@@ -75,11 +75,11 @@ Prefer to do it by hand, or need Claude Desktop? Pick **one** path. They're self
 
 <div align="center">
 
-| | 🐉 **A · All in Kali** | 🔗 **B · Split** | 🐳 **C · Docker** |
+| | 🐉 **A · All-in-one** | 🔗 **B · Split** | 🐳 **C · Docker** |
 |:--|:--:|:--:|:--:|
-| **Best for** | You live in Kali | Claude Desktop users | Avoiding VMs |
-| **AI runs on** | Kali | Your computer | Your computer |
-| **Tools run on** | Kali | Kali VM | Container |
+| **Best for** | You live in Kali / Parrot | Claude Desktop users | Avoiding VMs |
+| **AI runs on** | Kali / Parrot | Your computer | Your computer |
+| **Tools run on** | Kali / Parrot | Kali / Parrot VM | Container |
 | **Claude Desktop** | ❌ no Linux build | ✅ | ✅ |
 | **Things to keep running** | **1** | **3** | **3** |
 | **Difficulty** | 🟢 Easiest | 🔴 Hardest | 🟡 Medium |
@@ -87,21 +87,21 @@ Prefer to do it by hand, or need Claude Desktop? Pick **one** path. They're self
 </div>
 
 > [!NOTE]
-> **Not sure?** Live in Kali → **Path A**. On macOS or Windows and want Claude Desktop → **Path C**.
+> **Not sure?** Live in Kali or Parrot → **Path A**. On macOS or Windows and want Claude Desktop → **Path C**.
 
 <br>
 
 ## 🧩 What runs where
 
-Most setup confusion comes from losing track of which machine a command belongs to. Every command below is labelled **🐉 Run in Kali** or **💻 Run on your computer**.
+Most setup confusion comes from losing track of which machine a command belongs to. Every command below is labelled **🐉 Run in Kali / Parrot** or **💻 Run on your computer**.
 
 ```mermaid
 flowchart LR
-    A["🤖 AI Agent<br/><i>Claude · Cursor · Gemini</i>"] -->|asks for a scan| B["🔌 MCP Client<br/><i>starts automatically</i>"]
+    A["🤖 AI Agent<br/><i>Claude · Codex · Cursor · Gemini</i>"] -->|asks for a scan| B["🔌 MCP Client<br/><i>starts automatically</i>"]
     B -->|Path B & C only| C["🌉 Proxy Daemon<br/><i>you start this</i>"]
     C --> D["⚙️ API Server<br/><i>you start this</i>"]
     B -->|Path A: direct| D
-    D --> E["🛠️ 600+ Kali tools"]
+    D --> E["🛠️ 600+ Kali / Parrot tools"]
 
     style A fill:#7C3AED,stroke:#5B21B6,color:#fff
     style B fill:#2563EB,stroke:#1D4ED8,color:#fff
@@ -124,7 +124,7 @@ flowchart LR
 ## 📦 Manual setup
 
 <details>
-<summary><h3>🐉 &nbsp;Path A — Everything inside Kali</h3></summary>
+<summary><h3>🐉 &nbsp;Path A — Everything inside Kali / Parrot</h3></summary>
 
 <br>
 
@@ -133,7 +133,7 @@ flowchart LR
 
 ### 1️⃣ Install the security tools
 
-> **🐉 Run in Kali**
+> **🐉 Run in Kali / Parrot**
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
@@ -141,7 +141,7 @@ sudo apt install -y nmap masscan amass hydra ffuf gobuster nikto nuclei sqlmap s
 ```
 
 <details>
-<summary>Don't have Kali yet?</summary>
+<summary>Don't have Kali or Parrot yet?</summary>
 
 <br>
 
@@ -154,13 +154,14 @@ wsl --install -d kali-linux
 kali
 ```
 
-**macOS** — grab the [Kali VM image](https://www.kali.org/get-kali/#kali-virtual-machines) and import it into VMware Fusion or VirtualBox. Give it 4 GB RAM, 40 GB disk, 2 CPUs.
+**macOS or any host** — grab a VM image and import it into VMware Fusion or VirtualBox:
+[Kali](https://www.kali.org/get-kali/#kali-virtual-machines) · [Parrot](https://parrotsec.org/download/). Give it 4 GB RAM, 40 GB disk, 2 CPUs.
 
 </details>
 
 ### 2️⃣ Install PhantomStrike
 
-> **🐉 Run in Kali**
+> **🐉 Run in Kali / Parrot**
 
 ```bash
 git clone https://github.com/Red-Snow/phantomstrike.git
@@ -174,10 +175,10 @@ pwd    # note this path — you need it in step 4
 
 ### 3️⃣ Install an AI agent
 
-> **🐉 Run in Kali**
+> **🐉 Run in Kali / Parrot**
 
 > [!WARNING]
-> Claude Desktop has **no Linux build**. On this path use Cursor or Gemini CLI.
+> Claude Desktop has **no Linux build**. On this path use Cursor, Codex, or Gemini CLI.
 
 ```bash
 # Cursor
@@ -192,16 +193,29 @@ npm install -g @google/gemini-cli
 gemini          # sign in when prompted
 ```
 
+```bash
+# Codex CLI
+npm install -g @openai/codex
+codex           # sign in when prompted
+```
+
 ### 4️⃣ Connect the agent
 
-> **🐉 Run in Kali**
+> **🐉 Run in Kali / Parrot**
 
-Create the config for whichever agent you installed — **replace the path with your own from step 2**.
+PhantomStrike is a standard MCP server, so **any MCP-compatible agent works**.
+Add it to whichever you installed — **replacing the path with your own from step 2**.
 
-| Agent | File |
+<details open>
+<summary><b>Cursor · Gemini CLI · Claude Desktop · most others (JSON)</b></summary>
+
+<br>
+
+| Agent | Config file |
 |:--|:--|
 | Cursor | `~/.cursor/mcp.json` |
 | Gemini CLI | `~/.gemini/settings.json` |
+| Claude Desktop | `~/.config/Claude/claude_desktop_config.json` |
 
 ```json
 {
@@ -213,6 +227,30 @@ Create the config for whichever agent you installed — **replace the path with 
   }
 }
 ```
+
+</details>
+
+<details>
+<summary><b>Codex CLI (TOML)</b></summary>
+
+<br>
+
+Codex uses TOML, not JSON. Edit `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.phantomstrike]
+command = "/root/phantomstrike/.venv/bin/phantomstrike-mcp"
+args = ["--mode", "local"]
+```
+
+A project-scoped `.codex/config.toml` works too, for trusted projects.
+
+</details>
+
+> [!TIP]
+> **Using something else?** Any client that speaks MCP over stdio can run
+> `phantomstrike-mcp --mode local`. Point your agent's MCP config at that
+> binary and it will discover the tools automatically.
 
 Restart your agent so it reads the config.
 
@@ -228,15 +266,15 @@ Ask your agent: *"List all available PhantomStrike tools"*
 </details>
 
 <details>
-<summary><h3>🔗 &nbsp;Path B — AI on your computer, tools on a Kali VM</h3></summary>
+<summary><h3>🔗 &nbsp;Path B — AI on your computer, tools on a Kali / Parrot VM</h3></summary>
 
 <br>
 
-Three things stay running: the **API server** in Kali, the **proxy daemon** on your computer, and your **AI agent**.
+Three things stay running: the **API server** on the Kali / Parrot box, the **proxy daemon** on your computer, and your **AI agent**.
 
 ### 1️⃣ Install and start the API server
 
-> **🐉 Run in Kali**
+> **🐉 Run in Kali / Parrot**
 
 ```bash
 sudo apt update
@@ -263,7 +301,7 @@ export PHANTOMSTRIKE_API_KEYS="paste-your-key-here"
 phantomstrike --host 0.0.0.0 --port 8443
 ```
 
-**Leave this terminal open.** In a second Kali terminal, find your IP:
+**Leave this terminal open.** In a second terminal on that box, find your IP:
 
 ```bash
 ip addr show | grep "inet " | grep -v 127.0.0.1
@@ -490,7 +528,7 @@ cd phantomstrike
 | Path | After a reboot |
 |:--|:--|
 | 🐉 **A** | **Nothing.** Just open your AI agent. |
-| 🔗 **B** | 1. 🐉 Kali: `./start.sh` &nbsp; 2. 💻 `./start.sh proxy` &nbsp; 3. Open Claude Desktop |
+| 🔗 **B** | 1. 🐉 Kali/Parrot: `./start.sh` &nbsp; 2. 💻 `./start.sh proxy` &nbsp; 3. Open Claude Desktop |
 | 🐳 **C** | 1. 💻 `docker compose up -d` &nbsp; 2. 💻 `./start.sh proxy` &nbsp; 3. Open Claude Desktop |
 
 > [!IMPORTANT]
@@ -544,7 +582,7 @@ export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml
 | Won't start: "unauthenticated root shell" | Auth off + shell on + public bind | Enable auth, or bind to `127.0.0.1` |
 | `out of scope` refusals | Engagement file active | Add target to `in_scope`, or unset the variable |
 | `binary not found` | Tool not installed | `sudo apt install -y <tool>` |
-| Can't reach Kali API | Firewall or wrong IP | `sudo ufw allow 8443`, recheck `ip addr show` |
+| Can't reach the API from your computer | Firewall or wrong IP | `sudo ufw allow 8443`, recheck `ip addr show` |
 
 </div>
 
@@ -572,7 +610,8 @@ Thirteen tools ship with dedicated parsers, so their results come back structure
 
 **`kali_shell` gives your agent the other 600+.** `wpscan`, `dirb`, `enum4linux`,
 `crackmapexec`, `john`, `responder`, `metasploit` — anything installed on the box,
-plus `grep`, `pip`, and any script you've written yourself.
+plus `grep`, `pip`, and any script you've written yourself. Works the same on
+Kali and Parrot.
 
 **It is on by default.** That is the point of the framework: your agent gets the
 whole distribution, not a curated subset.
