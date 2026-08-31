@@ -87,8 +87,12 @@ def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
         """
         if mode == "remote":
             try:
-                data = await _proxy_request("GET", "/health", timeout=10)
-                return data.get("plugins", data)
+                # /api/tools returns registry.summary() on the server — the
+                # same shape the local branch below returns directly. /health
+                # was queried here previously; it is unauthenticated and
+                # discloses no tool data, so this always returned the liveness
+                # payload instead of a tool list.
+                return await _proxy_request("GET", "/api/tools", timeout=10)
             except Exception as e:
                 return {"error": f"Failed to fetch remote tool list: {e}"}
         return registry.summary()
@@ -104,6 +108,16 @@ def create_mcp_server(mode: str = "local", server_url: str = "") -> FastMCP:
         Returns:
             Tool metadata including description, parameters, and availability.
         """
+        if mode == "remote":
+            # The plugin registry above is populated from *this* process's
+            # machine. In remote/split mode that's the MCP client host (e.g.
+            # a Mac), not the machine that actually executes tools (the Kali/
+            # Parrot VM) — so availability must come from the API server too.
+            try:
+                return await _proxy_request("GET", f"/api/tools/{tool_name}", timeout=10)
+            except Exception as e:
+                return {"error": f"Failed to fetch remote tool info for '{tool_name}': {e}"}
+
         plugin = registry.get(tool_name)
         if not plugin:
             return {"error": f"Tool '{tool_name}' not found", "available_tools": registry.get_names()}
