@@ -63,7 +63,7 @@ This is the setup for **Claude Desktop + a VM in VMware Fusion, Parallels, Virtu
 curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --client
 ```
 
-> **🪟 Windows — PowerShell**
+> **🪩 Windows — PowerShell**
 
 ```powershell
 irm https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.ps1 | iex
@@ -93,7 +93,7 @@ cd ~/phantomstrike && ./start.sh server
 cd ~/phantomstrike && ./start.sh proxy
 ```
 
-> **🪟 On Windows — PowerShell**
+> **🪩 On Windows — PowerShell**
 
 ```powershell
 cd $env:USERPROFILE\phantomstrike
@@ -629,7 +629,7 @@ cd ~/phantomstrike
 ./start.sh proxy      # 💻 run this on your computer
 ```
 
-#### 🪟 Windows
+#### 🪩 Windows
 
 ```powershell
 cd $env:USERPROFILE\phantomstrike
@@ -712,6 +712,9 @@ export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml
 | Won't start: "unauthenticated root shell" | Auth off + shell on + public bind | Enable auth, or bind to `127.0.0.1` |
 | `out of scope` refusals | Engagement file active | Add target to `in_scope`, or unset the variable |
 | `binary not found` | Tool not installed | `sudo apt install -y <tool>` (in the VM) |
+| `masscan` fails: `permission denied` | It needs raw sockets | Run it via `sudo`, or once: `sudo setcap cap_net_raw+ep $(which masscan)` |
+| `nuclei`: `no templates provided for scan` | Templates were never downloaded | `nuclei -update-templates` (in the VM). If that also fails, clone them directly: `git clone --depth 1 https://github.com/projectdiscovery/nuclei-templates.git ~/.local/nuclei-templates` |
+| `amass` returns 0 subdomains, every time | Working as designed in passive mode | Passive mode stores results in its local database, not stdout. Run `amass db -names -d <target>` to read them, or call `amass` again with `passive: false` |
 
 </div>
 
