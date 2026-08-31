@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-# ── Appearance ─────────────────────────────────────────────────────────
+# ── Appearance ────────────────────────────────────────────────────────────
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
     R='\033[0;31m'; G='\033[0;32m'; Y='\033[1;33m'; C='\033[0;36m'
@@ -83,7 +83,7 @@ EOF
 exit 0
 }
 
-# ── Options ──────────────────────────────────────────────────────────
+# ── Options ───────────────────────────────────────────────────────────────
 
 ROLE=""                 # allinone | client
 REMOTE_URL=""
@@ -106,7 +106,7 @@ parse_args() {
     done
 }
 
-# ── Environment detection ────────────────────────────────────────────────
+# ── Environment detection ─────────────────────────────────────────────────
 
 OS=""           # linux | macos
 DISTRO=""       # kali | parrot | debian | ubuntu | fedora | arch | macos | unknown
@@ -160,7 +160,7 @@ detect_environment() {
     ok "Detected: ${B}${label}${N}"
 }
 
-# ── Role ─────────────────────────────────────────────────────────────
+# ── Role ──────────────────────────────────────────────────────────────────
 
 decide_role() {
     if [ -n "$ROLE" ]; then
@@ -196,7 +196,7 @@ decide_role() {
     info "Running the AI agent here but the tools elsewhere? Re-run with --client."
 }
 
-# ── Python ────────────────────────────────────────────────────────────
+# ── Python ────────────────────────────────────────────────────────────────
 
 check_python() {
     step "Checking Python"
@@ -220,7 +220,7 @@ check_python() {
     fi
 }
 
-# ── Security tools ─────────────────────────────────────────────────────
+# ── Security tools ────────────────────────────────────────────────────────
 
 TOOLS="nmap masscan amass hydra ffuf gobuster nikto nuclei sqlmap subfinder"
 
@@ -284,7 +284,7 @@ install_tools() {
     fi
 }
 
-# ── PhantomStrike ─────────────────────────────────────────────────────
+# ── PhantomStrike ─────────────────────────────────────────────────────────
 
 INSTALL_DIR=""
 
@@ -322,7 +322,7 @@ install_phantomstrike() {
     ok "PhantomStrike installed"
 }
 
-# ── Configuration ─────────────────────────────────────────────────────
+# ── Configuration ─────────────────────────────────────────────────────────
 
 API_KEY=""
 
@@ -373,9 +373,46 @@ setup_config() {
     fi
 
     # All-in-one / server: this machine runs the server, so it holds the key.
+    #
+    # An explicit --api-key always wins over whatever is already on disk. The
+    # common path here is a VM that was first set up standalone (its own key)
+    # and is now being paired with a host that generated a different one. If
+    # the old key silently survived, every call from the host would come back
+    # 401 and nothing would say why.
     if [ -f ".env" ] && grep -q "^PHANTOMSTRIKE_API_KEYS=" .env; then
-        API_KEY=$(grep "^PHANTOMSTRIKE_API_KEYS=" .env | head -1 | cut -d= -f2- | tr -d '"')
-        ok "Existing key found in .env — keeping it"
+        local existing
+        existing=$(grep "^PHANTOMSTRIKE_API_KEYS=" .env | head -1 | cut -d= -f2- | tr -d '"')
+
+        if [ -z "$PROVIDED_KEY" ] || [ "$PROVIDED_KEY" = "$existing" ]; then
+            API_KEY="$existing"
+            ok "Existing key found in .env — keeping it"
+            return
+        fi
+
+        API_KEY="$PROVIDED_KEY"
+        cp .env ".env.backup-$(date +%s)"
+        # Rewrite the line in place rather than appending a second one: the
+        # server reads the first match, so an appended key would be ignored.
+        python3 - "$API_KEY" <<'PYKEY'
+import sys, pathlib
+key = sys.argv[1]
+path = pathlib.Path(".env")
+lines = path.read_text(encoding="utf-8").splitlines()
+out, replaced = [], False
+for line in lines:
+    if line.startswith("PHANTOMSTRIKE_API_KEYS=") and not replaced:
+        out.append(f"PHANTOMSTRIKE_API_KEYS={key}")
+        replaced = True
+    elif line.startswith("PHANTOMSTRIKE_API_KEYS="):
+        continue  # drop duplicates; only the first was ever read
+    else:
+        out.append(line)
+if not replaced:
+    out.append(f"PHANTOMSTRIKE_API_KEYS={key}")
+path.write_text("\n".join(out) + "\n", encoding="utf-8")
+PYKEY
+        ok "Replaced the old key with the one your client machine supplied"
+        info "The previous .env was backed up next to it."
         return
     fi
 
@@ -398,7 +435,7 @@ setup_config() {
     fi
 }
 
-# ── Start script ─────────────────────────────────────────────────────
+# ── Start script ──────────────────────────────────────────────────────────
 #
 # The point of this: after a reboot, people were reinstalling from scratch
 # because they had no record of how to start things again. Now there is one file.
@@ -510,7 +547,21 @@ STARTEOF
     ok "Created ${B}start.sh${N}"
 }
 
-# ── Agent configuration ────────────────────────────────────────────────
+# ── Agent configuration ───────────────────────────────────────────────────
+
+# Which agents this run actually wired up, so the closing summary can name
+# them by the name on the icon rather than by a config filename.
+CONFIGURED_AGENTS=""
+
+agent_label() {
+    case "$1" in
+        *claude_desktop_config.json) echo "Claude-Desktop" ;;
+        *.cursor/mcp.json)           echo "Cursor" ;;
+        *.gemini/settings.json)      echo "Gemini-CLI" ;;
+        *.codex/config.toml)         echo "Codex" ;;
+        *)                           echo "agent" ;;
+    esac
+}
 
 configure_agent() {
     step "Configuring your AI agent"
@@ -531,6 +582,14 @@ configure_agent() {
     fi
     cursor_cfg="$HOME/.cursor/mcp.json"
     gemini_cfg="$HOME/.gemini/settings.json"
+
+    # Claude Desktop only creates its config folder after its first launch, and
+    # a freshly installed copy that has never been opened would otherwise be
+    # skipped as "not installed". If the app is on disk, treat it as installed
+    # and create the folder ourselves.
+    if [ "$OS" = "macos" ] && [ -d "/Applications/Claude.app" ]; then
+        mkdir -p "$(dirname "$claude_cfg")"
+    fi
 
     for cfg in "$claude_cfg" "$cursor_cfg" "$gemini_cfg"; do
         local dir; dir="$(dirname "$cfg")"
@@ -579,6 +638,8 @@ PYMERGE
                 else
                     ok "Updated $(basename "$cfg") ${DIM}(--mode $mcp_mode)${N}"
                 fi
+                info "  ${DIM}$cfg${N}"
+                CONFIGURED_AGENTS="$CONFIGURED_AGENTS $(agent_label "$cfg")"
                 written="yes"
             else
                 warn "$(basename "$cfg") is not valid JSON — not touching it."
@@ -589,6 +650,8 @@ PYMERGE
             mkdir -p "$dir"
             echo "$snippet" | python3 -c "import json,sys;json.dump(json.load(sys.stdin),open(sys.argv[1],'w'),indent=2)" "$cfg"
             ok "Created $(basename "$cfg") ${DIM}(--mode $mcp_mode)${N}"
+            info "  ${DIM}$cfg${N}"
+            CONFIGURED_AGENTS="$CONFIGURED_AGENTS $(agent_label "$cfg")"
             written="yes"
         fi
     done
@@ -598,6 +661,7 @@ PYMERGE
     if [ -d "$HOME/.codex" ]; then
         if [ -f "$codex_cfg" ] && grep -q "phantomstrike" "$codex_cfg" 2>/dev/null; then
             ok "Already configured: config.toml (Codex)"
+            CONFIGURED_AGENTS="$CONFIGURED_AGENTS Codex"
             written="yes"
         else
             [ -f "$codex_cfg" ] && cp "$codex_cfg" "$codex_cfg.backup-$(date +%s)"
@@ -608,18 +672,27 @@ PYMERGE
                 echo "args = [\"--mode\", \"$mcp_mode\"]"
             } >> "$codex_cfg"
             ok "Updated config.toml (Codex)"
+            CONFIGURED_AGENTS="$CONFIGURED_AGENTS Codex"
             written="yes"
         fi
     fi
 
     if [ "$written" = "no" ]; then
-        warn "No AI agent detected on this machine."
-        info "PhantomStrike works with any MCP-compatible agent. Install one"
-        info "(Claude Desktop, Cursor, Codex, Gemini CLI), then re-run this script."
+        warn "No AI agent found on this machine — nothing was configured."
+        info "PhantomStrike works with any MCP-compatible agent."
+        if [ "$OS" = "macos" ]; then
+            info "If Claude Desktop is installed, open it once so it creates its"
+            info "settings folder, then run this script again."
+        fi
+        info "Looked for:"
+        info "  ${DIM}$claude_cfg${N}"
+        info "  ${DIM}$cursor_cfg${N}"
+        info "  ${DIM}$gemini_cfg${N}"
+        info "  ${DIM}$HOME/.codex/config.toml${N}"
     fi
 }
 
-# ── Summary ──────────────────────────────────────────────────────────
+# ── Summary ───────────────────────────────────────────────────────────────
 
 print_summary() {
     echo ""
@@ -645,7 +718,13 @@ print_summary() {
         echo ""
         echo -e "  ${C}2.${N} Back here, start the bridge and leave it open:"
         echo -e "        ${B}cd $INSTALL_DIR && ./start.sh proxy${N}"
-        echo -e "  ${C}3.${N} Quit your AI agent completely, then reopen it"
+        if [ -n "$CONFIGURED_AGENTS" ]; then
+            echo -e "  ${C}3.${N} Fully quit and reopen:${B}$CONFIGURED_AGENTS${N}"
+            echo -e "     ${DIM}On a Mac, Cmd+Q — closing the window is not enough.${N}"
+            echo -e "     ${DIM}Its config is already written; you do not edit any JSON.${N}"
+        else
+            echo -e "  ${C}3.${N} Quit your AI agent completely, then reopen it"
+        fi
         echo -e "  ${C}4.${N} Ask it: ${DIM}\"List all available PhantomStrike tools\"${N}"
         echo ""
         echo -e "${B}  Check before you start${N}"
@@ -690,7 +769,7 @@ print_summary() {
     echo ""
 }
 
-# ── Run ──────────────────────────────────────────────────────────────
+# ── Run ───────────────────────────────────────────────────────────────────
 
 main() {
     parse_args "$@"
