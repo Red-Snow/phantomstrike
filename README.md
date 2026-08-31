@@ -753,7 +753,7 @@ No response means it's a network problem (IP, firewall, VM network mode), not a 
 
 ## 🧰 Available tools
 
-Thirteen tools ship with dedicated parsers, so their results come back structured rather than as raw text:
+Twelve tools ship with dedicated parsers, so their results come back structured rather than as raw text:
 
 <div align="center">
 
