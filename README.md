@@ -63,7 +63,7 @@ This is the setup for **Claude Desktop + a VM in VMware Fusion, Parallels, Virtu
 curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --client
 ```
 
-> **🪩 Windows — PowerShell**
+> **🪟 Windows — PowerShell**
 
 ```powershell
 irm https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.ps1 | iex
@@ -93,7 +93,7 @@ cd ~/phantomstrike && ./start.sh server
 cd ~/phantomstrike && ./start.sh proxy
 ```
 
-> **🪩 On Windows — PowerShell**
+> **🪟 On Windows — PowerShell**
 
 ```powershell
 cd $env:USERPROFILE\phantomstrike
@@ -629,7 +629,7 @@ cd ~/phantomstrike
 ./start.sh proxy      # 💻 run this on your computer
 ```
 
-#### 🪩 Windows
+#### 🪟 Windows
 
 ```powershell
 cd $env:USERPROFILE\phantomstrike
