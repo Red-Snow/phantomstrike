@@ -30,24 +30,85 @@ back the results.
 
 ## 🚀 Quick start
 
-One command. It installs the tools, sets up Python, generates your API key, configures your AI agent, and writes a start script.
+The script installs the tools, sets up Python, generates your API key, **edits your AI agent's config file for you**, and writes a start script. You never hand-edit JSON.
 
-#### 🐧 Linux · Kali · Parrot · macOS
+Pick the line that matches where you're sitting.
+
+<br>
+
+### 🐉 A · You're working inside Kali or Parrot
+
+Everything on one machine. Run this in a terminal there:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash
 ```
 
-#### 🪟 Windows (PowerShell)
+Restart your AI agent. Done — there's no server or proxy to start.
+
+<br>
+
+### 💻 B · Your AI runs on a Mac or Windows PC, tools on a Kali / Parrot VM
+
+This is the setup for **Claude Desktop + a VM in VMware Fusion, Parallels, VirtualBox, or WSL**.
+
+> [!IMPORTANT]
+> **Start on your Mac / PC, not in the VM.** The key is generated on your computer and pasted *into* the VM. Host→VM paste works reliably; VM→host often doesn't — so nothing ever has to be copied out of the VM.
+
+**Step 1 — on your Mac / Windows PC:**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --client
+```
 
 ```powershell
 irm https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.ps1 | iex
 ```
 
+It asks for your VM's IP address, then prints **one line** that already contains your key.
+
+**Step 2 — paste that line into your Kali / Parrot VM.** It looks like this:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --api-key <your-key>
+```
+
+**Step 3 — start both halves and leave both windows open:**
+
+```bash
+# 🐉 in the VM
+cd ~/phantomstrike && ./start.sh server
+```
+
+```bash
+# 💻 on your Mac / PC
+cd ~/phantomstrike && ./start.sh proxy
+```
+
+**Step 4 — fully quit your AI agent and reopen it.** On a Mac that's <kbd>⌘</kbd>+<kbd>Q</kbd>; closing the window isn't enough.
+
+<details>
+<summary><b>Don't know your VM's IP?</b></summary>
+
+<br>
+
+Run this **in the VM** and look for the `192.168.x.x` or `10.x.x.x` address:
+
+```bash
+ip -4 addr | grep inet
+# inet 192.168.72.128/24  →  your IP is 192.168.72.128
+```
+
+If your computer still can't reach it, open the port in the VM: `sudo ufw allow 8443`
+
+</details>
+
+<br>
+
 > [!TIP]
 > **Safe to run again.** Re-running keeps your existing key and skips anything already done. If a step fails, fix the cause and run it again — you never need to start over.
 
-Then restart your AI agent and ask it:
+Then ask your agent:
 
 > *"List all available PhantomStrike tools"*
 
@@ -60,10 +121,28 @@ Then restart your AI agent and ask it:
 2. Installs the security tools (`nmap`, `nuclei`, `sqlmap`, `ffuf`, and the rest)
 3. Creates a Python virtual environment and installs PhantomStrike
 4. **Generates your API key** and saves it to `.env` — which is gitignored, so it can never be committed
-5. **Writes `start.sh`** so restarting later is one command
-6. Configures Cursor / Codex / Gemini CLI / Claude Desktop — only the ones you actually have installed, and it backs up any existing config rather than overwriting other MCP servers
+5. **Writes `start.sh`** (or `start.ps1`) so restarting later is one command
+6. **Edits your agent's config file directly** — Claude Desktop, Cursor, Codex, Gemini CLI. It reads the existing file, adds one entry, and writes it back, so **other MCP servers you already had are kept**. A timestamped backup is made first, and a config it can't parse is left alone rather than guessed at.
 
-It never overwrites your work and it never commits your key.
+It only touches agents you actually have installed. It never overwrites your work and it never commits your key.
+
+</details>
+
+<details>
+<summary><b>Where did it put the agent config?</b></summary>
+
+<br>
+
+The script prints the full path when it writes one. For reference:
+
+| Agent | macOS | Windows | Linux |
+|:--|:--|:--|:--|
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | `%APPDATA%\Claude\claude_desktop_config.json` | `~/.config/Claude/claude_desktop_config.json` |
+| Cursor | `~/.cursor/mcp.json` | `%USERPROFILE%\.cursor\mcp.json` | `~/.cursor/mcp.json` |
+| Gemini CLI | `~/.gemini/settings.json` | `%USERPROFILE%\.gemini\settings.json` | `~/.gemini/settings.json` |
+| Codex CLI | `~/.codex/config.toml` | `%USERPROFILE%\.codex\config.toml` | `~/.codex/config.toml` |
+
+If the script reported **"No AI agent found"**, open the app once so it creates its settings folder, then run the script again.
 
 </details>
 
@@ -71,7 +150,7 @@ It never overwrites your work and it never commits your key.
 
 ## 🗺️ Choose your setup
 
-Prefer to do it by hand, or need Claude Desktop? Pick **one** path. They're self-contained — commands from one path won't work in another.
+**The setup script above covers Paths A and B already.** This section is for doing it by hand, or for Docker. Pick **one** path — they're self-contained, and commands from one path won't work in another.
 
 <div align="center">
 
@@ -82,12 +161,13 @@ Prefer to do it by hand, or need Claude Desktop? Pick **one** path. They're self
 | **Tools run on** | Kali / Parrot | Kali / Parrot VM | Container |
 | **Claude Desktop** | ❌ no Linux build | ✅ | ✅ |
 | **Things to keep running** | **1** | **3** | **3** |
-| **Difficulty** | 🟢 Easiest | 🔴 Hardest | 🟡 Medium |
+| **By hand** | 🟢 Easiest | 🟡 Medium | 🟡 Medium |
+| **With the script** | 🟢 One command | 🟢 Two commands | — |
 
 </div>
 
 > [!NOTE]
-> **Not sure?** Live in Kali or Parrot → **Path A**. On macOS or Windows and want Claude Desktop → **Path C**.
+> **Not sure?** Live in Kali or Parrot → **Path A**. Mac or Windows with a Kali / Parrot VM → **Path B** (use [Quick start B](#-b--your-ai-runs-on-a-mac-or-windows-pc-tools-on-a-kali--parrot-vm) — the script does the awkward parts). No VM and you'd rather not make one → **Path C**.
 
 <br>
 
@@ -272,7 +352,20 @@ Ask your agent: *"List all available PhantomStrike tools"*
 
 Three things stay running: the **API server** on the Kali / Parrot box, the **proxy daemon** on your computer, and your **AI agent**.
 
-### 1️⃣ Install and start the API server
+> [!IMPORTANT]
+> **The order of these steps matters.** You generate the key on **your computer** and carry it *into* the VM. Doing it the other way round means copying text out of a VM, and guest→host clipboard is exactly the direction that tends not to work in VMware Fusion and VirtualBox.
+
+### 1️⃣ Generate the key on your computer
+
+> **💻 Run on your computer**
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+Keep that terminal visible — you'll paste this value twice, and both times you're pasting *from* your computer.
+
+### 2️⃣ Install and start the API server
 
 > **🐉 Run in Kali / Parrot**
 
@@ -287,30 +380,26 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Generate your API key — **the server will not start without one**:
+Paste the key from step 1 here — **the server will not start without one**:
 
 ```bash
-python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-> [!IMPORTANT]
-> Copy that value somewhere. You need the **exact same key** again in step 3.
-
-```bash
-export PHANTOMSTRIKE_API_KEYS="paste-your-key-here"
+export PHANTOMSTRIKE_API_KEYS="paste-the-key-from-step-1"
 phantomstrike --host 0.0.0.0 --port 8443
 ```
 
 **Leave this terminal open.** In a second terminal on that box, find your IP:
 
 ```bash
-ip addr show | grep "inet " | grep -v 127.0.0.1
+ip -4 addr | grep inet
 # inet 192.168.72.128/24  →  your IP is 192.168.72.128
 ```
 
 If your computer can't reach it later: `sudo ufw allow 8443`
 
-### 2️⃣ Install PhantomStrike on your computer
+> [!TIP]
+> You only need to read the IP off the screen, not copy it — it's four short numbers.
+
+### 3️⃣ Install PhantomStrike on your computer
 
 > **💻 Run on your computer**
 
@@ -323,7 +412,7 @@ source .venv/bin/activate          # macOS/Linux
 pip install -e .
 ```
 
-### 3️⃣ Start the proxy daemon
+### 4️⃣ Start the proxy daemon
 
 > **💻 Run on your computer — new terminal**
 
@@ -351,14 +440,20 @@ You should see:
 
 **Leave this terminal open.**
 
-### 4️⃣ Connect Claude Desktop
+### 5️⃣ Connect Claude Desktop
 
 > **💻 Run on your computer**
+
+> [!TIP]
+> **You can skip the hand-editing.** Running `./setup.sh --client` on your computer writes this entry for you, keeping any MCP servers you already have. Use it even if you did the rest of this path manually.
 
 | OS | Config file |
 |:--|:--|
 | macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
 | Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Linux | `~/.config/Claude/claude_desktop_config.json` |
+
+If the file doesn't exist yet, create it with exactly this. If it already exists, add only the `"phantomstrike"` block inside the `"mcpServers"` you already have — don't replace the whole file.
 
 ```json
 {
@@ -371,9 +466,12 @@ You should see:
 }
 ```
 
-Then **quit Claude Desktop completely** — closing the window isn't enough — and reopen it.
+> [!WARNING]
+> `command` must be an **absolute path** — `~` and relative paths don't work here. Get it with `echo "$PWD/.venv/bin/phantomstrike-mcp"` from your clone.
 
-### 5️⃣ Check it works
+Then **quit Claude Desktop completely** (<kbd>⌘</kbd>+<kbd>Q</kbd> on a Mac — closing the window isn't enough) and reopen it.
+
+### 6️⃣ Check it works
 
 Ask Claude: *"List all available PhantomStrike tools"*
 
@@ -505,30 +603,44 @@ docker compose up -d --build   # rebuild after code changes
 
 ### If you used the setup script
 
+`start.sh` knows which half it was installed as, so plain `./start.sh` does the right thing on each machine. Be explicit if you'd rather not think about it.
+
 #### 🐧 Linux / macOS
 
 ```bash
-cd phantomstrike
-./start.sh status     # what's running?
-./start.sh            # start the server
-./start.sh proxy      # start the bridge
+cd ~/phantomstrike
+./start.sh status     # is the server up and reachable?
+./start.sh server     # 🐉 run this in the VM
+./start.sh proxy      # 💻 run this on your computer
 ```
 
 #### 🪟 Windows
 
 ```powershell
-cd phantomstrike
-.\start.ps1 -Mode status
-.\start.ps1 -Mode server
-.\start.ps1            # proxy
+cd $env:USERPROFILE\phantomstrike
+.\start.ps1 status
+.\start.ps1 server
+.\start.ps1 proxy
 ```
+
+<br>
+
+**Path B, after a reboot, in order:**
+
+| | Where | Command |
+|:--|:--|:--|
+| 1 | 🐉 Kali / Parrot VM | `cd ~/phantomstrike && ./start.sh server` |
+| 2 | 💻 Your computer | `cd ~/phantomstrike && ./start.sh proxy` |
+| 3 | 💻 Your computer | Open your AI agent |
+
+Nothing to reinstall and no keys to re-enter — they're already in `.env` on both machines.
 
 ### If you set up manually
 
 | Path | After a reboot |
 |:--|:--|
 | 🐉 **A** | **Nothing.** Just open your AI agent. |
-| 🔗 **B** | 1. 🐉 Kali/Parrot: `./start.sh` &nbsp; 2. 💻 `./start.sh proxy` &nbsp; 3. Open Claude Desktop |
+| 🔗 **B** | 1. 🐉 Kali/Parrot: `./start.sh server` &nbsp; 2. 💻 `./start.sh proxy` &nbsp; 3. Open Claude Desktop |
 | 🐳 **C** | 1. 💻 `docker compose up -d` &nbsp; 2. 💻 `./start.sh proxy` &nbsp; 3. Open Claude Desktop |
 
 > [!IMPORTANT]
@@ -574,17 +686,48 @@ export PHANTOMSTRIKE_ENGAGEMENT=./engagement.yaml
 
 | 😖 Symptom | 🔍 Cause | ✅ Fix |
 |:--|:--|:--|
-| `no API keys are configured` | Working as designed | `export PHANTOMSTRIKE_API_KEYS="<key>"` |
-| Proxy says `Auth: NO KEY SET` | Not exported in that terminal | `export PHANTOMSTRIKE_API_KEY="<key>"`, restart proxy |
-| Everything returns **401** | Proxy key ≠ server key | Make both variables identical |
-| Agent shows no tools | Config not loaded | Check the path, then **fully quit** and reopen the agent |
-| `kali_shell` missing | Explicitly turned off | Remove `PHANTOMSTRIKE_ALLOW_RAW_SHELL=false` |
+| **Can't paste the key out of the VM** | Guest→host clipboard is unreliable | You shouldn't have to. Run `./setup.sh --client` on your **computer** first and paste its one line *into* the VM |
+| **Agent shows no PhantomStrike tools** | Config not loaded | Re-run `./setup.sh --client` — it edits the config for you — then **fully quit** the agent (<kbd>⌘</kbd>+<kbd>Q</kbd>) and reopen |
+| **"No AI agent found"** during setup | App installed but never launched | Open the app once so it creates its settings folder, then re-run the script |
+| **Everything returns 401** | Server key ≠ client key | Re-run `./setup.sh --client` on your computer and paste its line into the VM again. It replaces the VM's old key |
+| `no API keys are configured` | Working as designed | `export PHANTOMSTRIKE_API_KEYS="<key>"`, or run `./setup.sh` |
+| Proxy says `Auth: NO KEY SET` | Not exported in that terminal | Use `./start.sh proxy`, which loads `.env` for you |
+| `./start.sh status` says **not reachable** | Server not started, wrong IP, or firewall | Start `./start.sh server` in the VM · recheck `ip -4 addr \| grep inet` · `sudo ufw allow 8443` |
+| `kali_shell` missing | Explicitly turned off | Remove `PHANTOMSTRIKE_ALLOW_RAW_SHELL=false` from `.env` |
 | Won't start: "unauthenticated root shell" | Auth off + shell on + public bind | Enable auth, or bind to `127.0.0.1` |
 | `out of scope` refusals | Engagement file active | Add target to `in_scope`, or unset the variable |
-| `binary not found` | Tool not installed | `sudo apt install -y <tool>` |
-| Can't reach the API from your computer | Firewall or wrong IP | `sudo ufw allow 8443`, recheck `ip addr show` |
+| `binary not found` | Tool not installed | `sudo apt install -y <tool>` (in the VM) |
 
 </div>
+
+<details>
+<summary><b>Checking the pairing by hand</b></summary>
+
+<br>
+
+Both machines must hold the **same** key. On each, print it:
+
+```bash
+# 🐉 in the VM
+grep PHANTOMSTRIKE_API_KEYS ~/phantomstrike/.env
+
+# 💻 on your computer
+grep PHANTOMSTRIKE_API_KEY ~/phantomstrike/.env
+```
+
+Compare the last few characters. If they differ, re-run `./setup.sh --client` on your computer and paste its line into the VM — that resets the VM to match.
+
+Then check the server answers your computer at all:
+
+```bash
+# 💻 on your computer
+curl http://<vm-ip>:8443/health
+# {"status":"healthy", ...}
+```
+
+No response means it's a network problem (IP, firewall, VM network mode), not a key problem.
+
+</details>
 
 **Still stuck?** [Open an issue](https://github.com/Red-Snow/phantomstrike/issues) with your path (A/B/C), the command, and the output.
 
