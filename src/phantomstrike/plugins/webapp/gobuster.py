@@ -52,6 +52,12 @@ class GobusterPlugin(BaseToolPlugin):
 
         if params.status_codes and params.mode in ("dir", "fuzz"):
             cmd.extend(["-s", params.status_codes])
+            # Gobuster 3.6+ defaults -b/--status-codes-blacklist to "404" and
+            # refuses to run with both -s and a non-empty -b set at once.
+            # Since status_codes has a non-empty default above, every default
+            # dir/fuzz run hit this and failed outright. Passing an empty
+            # blacklist is gobuster's own documented way to clear it.
+            cmd.extend(["-b", ""])
 
         # Quiet mode — no banner
         cmd.append("-q")

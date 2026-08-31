@@ -2,6 +2,13 @@
 Tests for tool plugins — validate command building and metadata.
 """
 
+import functools
+import http.server
+import shutil
+import socketserver
+import subprocess
+import threading
+
 import pytest
 from phantomstrike.plugins.network.nmap import NmapPlugin
 from phantomstrike.plugins.network.rustscan import RustscanPlugin
@@ -109,6 +116,56 @@ class TestCommandBuilding:
         assert cmd[0] == "gobuster"
         assert "dir" in cmd
         assert "-u" in cmd
+
+    def test_gobuster_status_codes_clears_default_blacklist(self):
+        # Gobuster 3.6+ defaults -b/--status-codes-blacklist to "404" and
+        # refuses to start if both -s and a non-empty -b are set. Since
+        # status_codes defaults to a non-empty string, every default dir/fuzz
+        # call must also clear -b, or gobuster exits 1 before scanning
+        # anything (confirmed against the real 3.6 binary).
+        plugin = GobusterPlugin()
+        params = plugin.InputSchema(target="http://example.com", mode="dir")
+        cmd = plugin.build_command(params)
+        assert "-s" in cmd
+        s_idx = cmd.index("-s")
+        assert cmd[s_idx + 1] == params.status_codes
+        assert "-b" in cmd
+        b_idx = cmd.index("-b")
+        assert cmd[b_idx + 1] == ""
+
+    def test_gobuster_dir_runs_against_real_binary(self, tmp_path):
+        # End-to-end: build the real command this plugin would run and
+        # execute it against a throwaway local HTTP server. This is the
+        # exact scenario that caught the -s/-b conflict above — a unit test
+        # that only checks flags are present would have passed even with
+        # the bug, since "-s" was always there; what broke was gobuster's
+        # own argument validation at process-launch time.
+        gobuster = shutil.which("gobuster")
+        if not gobuster:
+            pytest.skip("gobuster binary not installed")
+
+        (tmp_path / "found.txt").write_text("ok")
+        wordlist = tmp_path / "wordlist.txt"
+        wordlist.write_text("found.txt\nmissing.txt\n")
+
+        with socketserver.TCPServer(("127.0.0.1", 0), functools.partial(
+            http.server.SimpleHTTPRequestHandler, directory=str(tmp_path)
+        )) as httpd:
+            port = httpd.server_address[1]
+            thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+            thread.start()
+            try:
+                plugin = GobusterPlugin()
+                params = plugin.InputSchema(
+                    target=f"http://127.0.0.1:{port}", mode="dir", wordlist=str(wordlist),
+                )
+                cmd = plugin.build_command(params)
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                assert proc.returncode == 0, proc.stderr
+                assert "found.txt" in proc.stdout
+                assert "missing.txt" not in proc.stdout
+            finally:
+                httpd.shutdown()
 
     def test_hydra_ssh(self):
         plugin = HydraPlugin()
