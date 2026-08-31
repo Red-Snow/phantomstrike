@@ -1,0 +1,1459 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Powered Pentesting Framework">
+      
+      
+        <meta name="author" content="Red-Snow">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>PhantomStrike</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quick-start" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="PhantomStrike" class="md-header__button md-logo" aria-label="PhantomStrike" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PhantomStrike
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Red-Snow/phantomstrike" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Red-Snow/phantomstrike
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="PhantomStrike" class="md-nav__button md-logo" aria-label="PhantomStrike" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PhantomStrike
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Red-Snow/phantomstrike" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Red-Snow/phantomstrike
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Quick start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Quick start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-youre-working-inside-kali-or-parrot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐉 A · You're working inside Kali or Parrot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-your-ai-runs-on-a-mac-or-windows-pc-tools-on-a-kali-parrot-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💻 B · Your AI runs on a Mac or Windows PC, tools on a Kali / Parrot VM
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choose-your-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🗺️ Choose your setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-runs-where" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🧩 What runs where
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 Manual setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#restarting-it-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔄 Restarting it later
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Restarting it later">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if-you-used-the-setup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you used the setup script
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="If you used the setup script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux-macos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐧 Linux / macOS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🪟 Windows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-set-up-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you set up manually
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#safety-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🛡️ Safety controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🛡️ Safety controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#limiting-what-can-be-scanned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limiting what can be scanned
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🩺 Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🧰 Available tools
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧰 Available tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#everything-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔓 Everything else
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#try-asking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💬 Try asking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🤝 Contributing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Home</h1>
+
+<div align="center">
+
+# ⚡ PhantomStrike
+
+### Run Kali &amp; Parrot security tools by just asking your AI
+
+Ask Claude, Codex, Cursor, or Gemini to scan a host — PhantomStrike gives your agent
+**every one of the 600+ tools on Kali and Parrot**, runs them for real, and hands
+back the results.
+
+<br>
+
+[![License](https://img.shields.io/badge/License-MIT-3DA639?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![Security](https://img.shields.io/badge/Security-Policy-D9534F?style=for-the-badge&logo=shieldsdotio&logoColor=white)](SECURITY.md)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-7C3AED?style=for-the-badge&logo=anthropic&logoColor=white)](https://modelcontextprotocol.io)
+
+<br>
+
+**[Quick start](#-quick-start) · [Choose your setup](#-choose-your-setup) · [Restarting](#-restarting-it-later) · [Safety](#-safety-controls) · [Troubleshooting](#-troubleshooting)**
+
+</div>
+
+<hr />
+<blockquote>
+<p>[!CAUTION]
+<strong>Authorised testing only.</strong> Scanning systems you don't own or have written permission to test is illegal in most countries. PhantomStrike includes a <a href="#-safety-controls">scope file</a> to help you stay inside your authorisation — it's a safeguard, not a substitute for permission.</p>
+</blockquote>
+<p><br></p>
+<h2 id="quick-start">🚀 Quick start</h2>
+<p>The script installs the tools, sets up Python, generates your API key, <strong>edits your AI agent's config file for you</strong>, and writes a start script. You never hand-edit JSON.</p>
+<p>Pick the line that matches where you're sitting.</p>
+<p><br></p>
+<h3 id="a-youre-working-inside-kali-or-parrot">🐉 A · You're working inside Kali or Parrot</h3>
+<p>Everything on one machine. Run this in a terminal there:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-sSL<span class="w"> </span>https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+</span></code></pre></div>
+<p>Restart your AI agent. Done — there's no server or proxy to start.</p>
+<p><br></p>
+<h3 id="b-your-ai-runs-on-a-mac-or-windows-pc-tools-on-a-kali-parrot-vm">💻 B · Your AI runs on a Mac or Windows PC, tools on a Kali / Parrot VM</h3>
+<p>This is the setup for <strong>Claude Desktop + a VM in VMware Fusion, Parallels, VirtualBox, or WSL</strong>.</p>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Start on your Mac / PC, not in the VM.</strong> The key is generated on your computer and pasted <em>into</em> the VM. Host→VM paste works reliably; VM→host often doesn't — so nothing ever has to be copied out of the VM.</p>
+</blockquote>
+<p><strong>Step 1 — on your Mac / Windows PC:</strong></p>
+<blockquote>
+<p><strong>🍎🐧 macOS or Linux — Terminal</strong></p>
+</blockquote>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-sSL<span class="w"> </span>https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--client
+</span></code></pre></div>
+<blockquote>
+<p><strong>🪟 Windows — PowerShell</strong></p>
+</blockquote>
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">irm </span><span class="n">https</span><span class="p">://</span><span class="n">raw</span><span class="p">.</span><span class="n">githubusercontent</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">Red-Snow</span><span class="p">/</span><span class="n">phantomstrike</span><span class="p">/</span><span class="n">main</span><span class="p">/</span><span class="n">setup</span><span class="p">.</span><span class="n">ps1</span> <span class="p">|</span> <span class="nb">iex</span>
+</span></code></pre></div>
+<p>It asks for your VM's IP address, then prints <strong>one line</strong> that already contains your key.</p>
+<p><strong>Step 2 — paste that line into your Kali / Parrot VM.</strong> It looks like this:</p>
+<blockquote>
+<p><strong>🐉 Paste this inside Kali / Parrot</strong> — it works the same whether the VM runs in VMware Fusion, Parallels, VirtualBox, or WSL</p>
+</blockquote>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-sSL<span class="w"> </span>https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--api-key<span class="w"> </span>&lt;your-key&gt;
+</span></code></pre></div>
+<p><strong>Step 3 — start both halves and leave both windows open:</strong></p>
+<blockquote>
+<p><strong>🐉 In the Kali / Parrot VM</strong></p>
+</blockquote>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>~/phantomstrike<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./start.sh<span class="w"> </span>server
+</span></code></pre></div>
+<blockquote>
+<p><strong>🍎🐧 On your Mac / Linux — Terminal</strong></p>
+</blockquote>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">cd</span><span class="w"> </span>~/phantomstrike<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./start.sh<span class="w"> </span>proxy
+</span></code></pre></div>
+<blockquote>
+<p><strong>🪟 On Windows — PowerShell</strong></p>
+</blockquote>
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd </span><span class="nv">$env:USERPROFILE</span><span class="p">\</span><span class="n">phantomstrike</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p">.\</span><span class="n">start</span><span class="p">.</span><span class="n">ps1</span> <span class="n">proxy</span>
+</span></code></pre></div>
+<p><strong>Step 4 — fully quit your AI agent and reopen it.</strong> On a Mac that's <kbd>⌘</kbd>+<kbd>Q</kbd>; closing the window isn't enough.</p>
+<details>
+<summary><b>Don't know your VM's IP?</b></summary>
+
+<br>
+
+Run this **in the VM** and look for the `192.168.x.x` or `10.x.x.x` address:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>ip<span class="w"> </span>-4<span class="w"> </span>addr<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>inet
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># inet 192.168.72.128/24  →  your IP is 192.168.72.128</span>
+</span></code></pre></div>
+
+If your computer still can't reach it, open the port in the VM: `sudo ufw allow 8443`
+
+</details>
+
+<p><br></p>
+<blockquote>
+<p>[!TIP]
+<strong>Safe to run again.</strong> Re-running keeps your existing key and skips anything already done. If a step fails, fix the cause and run it again — you never need to start over.</p>
+</blockquote>
+<p>Then ask your agent:</p>
+<blockquote>
+<p><em>"List all available PhantomStrike tools"</em></p>
+</blockquote>
+<details>
+<summary><b>What does the script actually do?</b></summary>
+
+<br>
+
+1. Detects your distro and package manager — Kali, Parrot, Debian, Ubuntu, Fedora, Arch, macOS, WSL2
+2. Installs the security tools (`nmap`, `nuclei`, `sqlmap`, `ffuf`, and the rest)
+3. Creates a Python virtual environment and installs PhantomStrike
+4. **Generates your API key** and saves it to `.env` — which is gitignored, so it can never be committed
+5. **Writes `start.sh`** (or `start.ps1`) so restarting later is one command
+6. **Edits your agent's config file directly** — Claude Desktop, Cursor, Codex, Gemini CLI. It reads the existing file, adds one entry, and writes it back, so **other MCP servers you already had are kept**. A timestamped backup is made first, and a config it can't parse is left alone rather than guessed at.
+
+It only touches agents you actually have installed. It never overwrites your work and it never commits your key.
+
+</details>
+
+<details>
+<summary><b>Where did it put the agent config?</b></summary>
+
+<br>
+
+The script prints the full path when it writes one. For reference:
+
+| Agent | macOS | Windows | Linux |
+|:--|:--|:--|:--|
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | `%APPDATA%\Claude\claude_desktop_config.json` | `~/.config/Claude/claude_desktop_config.json` |
+| Cursor | `~/.cursor/mcp.json` | `%USERPROFILE%\.cursor\mcp.json` | `~/.cursor/mcp.json` |
+| Gemini CLI | `~/.gemini/settings.json` | `%USERPROFILE%\.gemini\settings.json` | `~/.gemini/settings.json` |
+| Codex CLI | `~/.codex/config.toml` | `%USERPROFILE%\.codex\config.toml` | `~/.codex/config.toml` |
+
+If the script reported **"No AI agent found"**, open the app once so it creates its settings folder, then run the script again.
+
+</details>
+
+<p><br></p>
+<h2 id="choose-your-setup">🗺️ Choose your setup</h2>
+<p><strong>The setup script above covers Paths A and B already.</strong> This section is for doing it by hand, or for Docker. Pick <strong>one</strong> path — they're self-contained, and commands from one path won't work in another.</p>
+<div align="center">
+
+| | 🐉 **A · All-in-one** | 🔗 **B · Split** | 🐳 **C · Docker** |
+|:--|:--:|:--:|:--:|
+| **Best for** | You live in Kali / Parrot | Claude Desktop users | Avoiding VMs |
+| **AI runs on** | Kali / Parrot | Your computer | Your computer |
+| **Tools run on** | Kali / Parrot | Kali / Parrot VM | Container |
+| **Claude Desktop** | ❌ no Linux build | ✅ | ✅ |
+| **Things to keep running** | **1** | **3** | **3** |
+| **By hand** | 🟢 Easiest | 🟡 Medium | 🟡 Medium |
+| **With the script** | 🟢 One command | 🟢 Two commands | — |
+
+</div>
+
+<blockquote>
+<p>[!NOTE]
+<strong>Not sure?</strong> Live in Kali or Parrot → <strong>Path A</strong>. Mac or Windows with a Kali / Parrot VM → <strong>Path B</strong> (use <a href="#-b--your-ai-runs-on-a-mac-or-windows-pc-tools-on-a-kali--parrot-vm">Quick start B</a> — the script does the awkward parts). No VM and you'd rather not make one → <strong>Path C</strong>.</p>
+</blockquote>
+<p><br></p>
+<h2 id="what-runs-where">🧩 What runs where</h2>
+<p>Most setup confusion comes from losing track of which machine a command belongs to. Every command below is labelled <strong>🐉 Run in Kali / Parrot</strong> or <strong>💻 Run on your computer</strong>.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>flowchart LR
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    A["🤖 AI Agent&lt;br/&gt;&lt;i&gt;Claude · Codex · Cursor · Gemini&lt;/i&gt;"] --&gt;|asks for a scan| B["🔌 MCP Client&lt;br/&gt;&lt;i&gt;starts automatically&lt;/i&gt;"]
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    B --&gt;|Path B &amp; C only| C["🌉 Proxy Daemon&lt;br/&gt;&lt;i&gt;you start this&lt;/i&gt;"]
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    C --&gt; D["⚙️ API Server&lt;br/&gt;&lt;i&gt;you start this&lt;/i&gt;"]
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    B --&gt;|Path A: direct| D
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    D --&gt; E["🛠️ 600+ Kali / Parrot tools"]
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    style A fill:#7C3AED,stroke:#5B21B6,color:#fff
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    style B fill:#2563EB,stroke:#1D4ED8,color:#fff
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    style C fill:#0891B2,stroke:#0E7490,color:#fff
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    style D fill:#059669,stroke:#047857,color:#fff
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    style E fill:#DC2626,stroke:#B91C1C,color:#fff
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Piece</th>
+<th style="text-align: left;">What it is</th>
+<th style="text-align: center;">You start it?</th>
+<th style="text-align: center;">Paths</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">⚙️ <strong>API server</strong></td>
+<td style="text-align: left;">Runs the actual security tools</td>
+<td style="text-align: center;">✅ Yes</td>
+<td style="text-align: center;">B · C</td>
+</tr>
+<tr>
+<td style="text-align: left;">🌉 <strong>Proxy daemon</strong></td>
+<td style="text-align: left;">Bridges Claude Desktop's network sandbox</td>
+<td style="text-align: center;">✅ Yes</td>
+<td style="text-align: center;">B · C</td>
+</tr>
+<tr>
+<td style="text-align: left;">🔌 <strong>MCP client</strong></td>
+<td style="text-align: left;">Your agent launches it for you</td>
+<td style="text-align: center;">❌ Never</td>
+<td style="text-align: center;">A · B · C</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Path A has no server and no proxy.</strong> The agent runs tools directly, which is why it's the simplest — one thing to keep running instead of three.</p>
+</blockquote>
+<p><br></p>
+<h2 id="manual-setup">📦 Manual setup</h2>
+<details>
+<summary><h3>🐉 &nbsp;Path A — Everything inside Kali / Parrot</h3></summary>
+
+<br>
+
+> [!NOTE]
+> No API key needed on this path — nothing talks over HTTP.
+
+### 1️⃣ Install the security tools
+
+> **🐉 Run in Kali / Parrot**
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>full-upgrade<span class="w"> </span>-y
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nmap<span class="w"> </span>masscan<span class="w"> </span>amass<span class="w"> </span>hydra<span class="w"> </span>ffuf<span class="w"> </span>gobuster<span class="w"> </span>nikto<span class="w"> </span>nuclei<span class="w"> </span>sqlmap<span class="w"> </span>subfinder
+</span></code></pre></div>
+
+<details>
+<summary>Don't have Kali or Parrot yet?</summary>
+
+<br>
+
+**Windows (WSL2)** — PowerShell as Administrator:
+
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">wsl</span> <span class="p">-</span><span class="n">-install</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">wsl</span> <span class="p">-</span><span class="n">-set-default-version</span> <span class="n">2</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">wsl</span> <span class="p">-</span><span class="n">-install</span> <span class="n">-d</span> <span class="n">kali-linux</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">kali</span>
+</span></code></pre></div>
+
+**macOS or any host** — grab a VM image and import it into VMware Fusion or VirtualBox:
+[Kali](https://www.kali.org/get-kali/#kali-virtual-machines) · [Parrot](https://parrotsec.org/download/). Give it 4 GB RAM, 40 GB disk, 2 CPUs.
+
+</details>
+
+### 2️⃣ Install PhantomStrike
+
+> **🐉 Run in Kali / Parrot**
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Red-Snow/phantomstrike.git
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nb">cd</span><span class="w"> </span>phantomstrike
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="nb">pwd</span><span class="w">    </span><span class="c1"># note this path — you need it in step 4</span>
+</span></code></pre></div>
+
+### 3️⃣ Install an AI agent
+
+> **🐉 Run in Kali / Parrot**
+
+> [!WARNING]
+> Claude Desktop has **no Linux build**. On this path use Cursor, Codex, or Gemini CLI.
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Cursor</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>curl<span class="w"> </span>https://cursor.com/install<span class="w"> </span>-fsS<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</span></code></pre></div>
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Gemini CLI</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://deb.nodesource.com/setup_20.x<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>-E<span class="w"> </span>bash<span class="w"> </span>-
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nodejs
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@google/gemini-cli
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>gemini<span class="w">          </span><span class="c1"># sign in when prompted</span>
+</span></code></pre></div>
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Codex CLI</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@openai/codex
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>codex<span class="w">           </span><span class="c1"># sign in when prompted</span>
+</span></code></pre></div>
+
+### 4️⃣ Connect the agent
+
+> **🐉 Run in Kali / Parrot**
+
+PhantomStrike is a standard MCP server, so **any MCP-compatible agent works**.
+Add it to whichever you installed — **replacing the path with your own from step 2**.
+
+<details open>
+<summary><b>Cursor · Gemini CLI · Claude Desktop · most others (JSON)</b></summary>
+
+<br>
+
+| Agent | Config file |
+|:--|:--|
+| Cursor | `~/.cursor/mcp.json` |
+| Gemini CLI | `~/.gemini/settings.json` |
+| Claude Desktop | `~/.config/Claude/claude_desktop_config.json` |
+
+<div class="language-json highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nt">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="nt">"phantomstrike"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">      </span><span class="nt">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/root/phantomstrike/.venv/bin/phantomstrike-mcp"</span><span class="p">,</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">      </span><span class="nt">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"--mode"</span><span class="p">,</span><span class="w"> </span><span class="s2">"local"</span><span class="p">]</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="p">}</span>
+</span></code></pre></div>
+
+</details>
+
+<details>
+<summary><b>Codex CLI (TOML)</b></summary>
+
+<br>
+
+Codex uses TOML, not JSON. Edit `~/.codex/config.toml`:
+
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">[mcp_servers.phantomstrike]</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"/root/phantomstrike/.venv/bin/phantomstrike-mcp"</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"--mode"</span><span class="p">,</span><span class="w"> </span><span class="s2">"local"</span><span class="p">]</span>
+</span></code></pre></div>
+
+A project-scoped `.codex/config.toml` works too, for trusted projects.
+
+</details>
+
+> [!TIP]
+> **Using something else?** Any client that speaks MCP over stdio can run
+> `phantomstrike-mcp --mode local`. Point your agent's MCP config at that
+> binary and it will discover the tools automatically.
+
+Restart your agent so it reads the config.
+
+### 5️⃣ Check it works
+
+Ask your agent: *"List all available PhantomStrike tools"*
+
+### 🔄 Restarting later
+
+> [!TIP]
+> **Nothing to do.** Open your AI agent — it starts PhantomStrike for you. Never repeat steps 1–4.
+
+</details>
+
+<details>
+<summary><h3>🔗 &nbsp;Path B — AI on your computer, tools on a Kali / Parrot VM</h3></summary>
+
+<br>
+
+Three things stay running: the **API server** on the Kali / Parrot box, the **proxy daemon** on your computer, and your **AI agent**.
+
+> [!IMPORTANT]
+> **The order of these steps matters.** You generate the key on **your computer** and carry it *into* the VM. Doing it the other way round means copying text out of a VM, and guest→host clipboard is exactly the direction that tends not to work in VMware Fusion and VirtualBox.
+
+### 1️⃣ Generate the key on your computer
+
+> **💻 Run on your computer**
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import secrets; print(secrets.token_urlsafe(32))"</span>
+</span></code></pre></div>
+
+Keep that terminal visible — you'll paste this value twice, and both times you're pasting *from* your computer.
+
+### 2️⃣ Install and start the API server
+
+> **🐉 Run in Kali / Parrot**
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nmap<span class="w"> </span>masscan<span class="w"> </span>amass<span class="w"> </span>hydra<span class="w"> </span>ffuf<span class="w"> </span>gobuster<span class="w"> </span>nikto<span class="w"> </span>nuclei<span class="w"> </span>sqlmap<span class="w"> </span>subfinder
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Red-Snow/phantomstrike.git
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="nb">cd</span><span class="w"> </span>phantomstrike
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</span></code></pre></div>
+
+Paste the key from step 1 here — **the server will not start without one**:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PHANTOMSTRIKE_API_KEYS</span><span class="o">=</span><span class="s2">"paste-the-key-from-step-1"</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>phantomstrike<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8443</span>
+</span></code></pre></div>
+
+**Leave this terminal open.** In a second terminal on that box, find your IP:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>ip<span class="w"> </span>-4<span class="w"> </span>addr<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>inet
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="c1"># inet 192.168.72.128/24  →  your IP is 192.168.72.128</span>
+</span></code></pre></div>
+
+If your computer can't reach it later: `sudo ufw allow 8443`
+
+> [!TIP]
+> You only need to read the IP off the screen, not copy it — it's four short numbers.
+
+### 3️⃣ Install PhantomStrike on your computer
+
+> **💻 Run on your computer**
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Red-Snow/phantomstrike.git
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nb">cd</span><span class="w"> </span>phantomstrike
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">          </span><span class="c1"># macOS/Linux</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="c1"># .venv\Scripts\Activate.ps1       # Windows PowerShell</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</span></code></pre></div>
+
+### 4️⃣ Start the proxy daemon
+
+> **💻 Run on your computer — new terminal**
+
+> [!NOTE]
+> **Why this exists:** Claude Desktop blocks MCP processes from opening network connections, even to your own machine. The proxy relays over a Unix socket, which the sandbox permits.
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="nb">cd</span><span class="w"> </span>phantomstrike
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PHANTOMSTRIKE_API_KEY</span><span class="o">=</span><span class="s2">"the-same-key-from-step-1"</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>python3<span class="w"> </span>proxy_daemon.py<span class="w"> </span>--remote<span class="w"> </span>http://192.168.72.128:8443
+</span></code></pre></div>
+
+You should see:
+
+<div class="language-text highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>🔌 PhantomStrike Proxy Daemon running
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>   Socket: /tmp/phantomstrike_proxy.sock
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>   Auth:   API key loaded          ← must say this
+</span></code></pre></div>
+
+> [!WARNING]
+> If it says **`NO KEY SET`**, every tool call will fail with 401. Set the variable and restart it.
+
+**Leave this terminal open.**
+
+### 5️⃣ Connect Claude Desktop
+
+> **💻 Run on your computer**
+
+> [!TIP]
+> **You can skip the hand-editing.** Running `./setup.sh --client` on your computer writes this entry for you, keeping any MCP servers you already have. Use it even if you did the rest of this path manually.
+
+| OS | Config file |
+|:--|:--|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Linux | `~/.config/Claude/claude_desktop_config.json` |
+
+If the file doesn't exist yet, create it with exactly this. If it already exists, add only the `"phantomstrike"` block inside the `"mcpServers"` you already have — don't replace the whole file.
+
+<div class="language-json highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="p">{</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">    </span><span class="nt">"phantomstrike"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">      </span><span class="nt">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/full/path/to/phantomstrike/.venv/bin/phantomstrike-mcp"</span><span class="p">,</span>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">      </span><span class="nt">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"--mode"</span><span class="p">,</span><span class="w"> </span><span class="s2">"remote"</span><span class="p">]</span>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="p">}</span>
+</span></code></pre></div>
+
+> [!WARNING]
+> `command` must be an **absolute path** — `~` and relative paths don't work here. Get it with `echo "$PWD/.venv/bin/phantomstrike-mcp"` from your clone.
+
+Then **quit Claude Desktop completely** (<kbd>⌘</kbd>+<kbd>Q</kbd> on a Mac — closing the window isn't enough) and reopen it.
+
+### 6️⃣ Check it works
+
+Ask Claude: *"List all available PhantomStrike tools"*
+
+### 🔄 Restarting later
+
+See [Restarting it later](#-restarting-it-later).
+
+</details>
+
+<details>
+<summary><h3>🐳 &nbsp;Path C — Docker</h3></summary>
+
+<br>
+
+Three things stay running: the **container**, the **proxy daemon**, and your **AI agent**.
+
+### 1️⃣ Install Docker
+
+> **💻 Run on your computer**
+
+Install [Docker Desktop](https://www.docker.com/products/docker-desktop), then check it:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>docker<span class="w"> </span>--version
+</span></code></pre></div>
+
+### 2️⃣ Start the container
+
+> **💻 Run on your computer**
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Red-Snow/phantomstrike.git
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nb">cd</span><span class="w"> </span>phantomstrike
+</span></code></pre></div>
+
+Generate your API key — the server won't start without one:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import secrets; print(secrets.token_urlsafe(32))"</span>
+</span></code></pre></div>
+
+Save it where Docker Compose picks it up automatically:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">'PHANTOMSTRIKE_API_KEYS=paste-your-key-here'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</span></code></pre></div>
+
+First build takes about 3 minutes.
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>curl<span class="w"> </span>http://localhost:8443/health
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="c1"># {"status":"healthy", ...}</span>
+</span></code></pre></div>
+
+### 3️⃣ Install the MCP client
+
+> **💻 Run on your computer — same folder**
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">          </span><span class="c1"># macOS/Linux</span>
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="c1"># .venv\Scripts\activate           # Windows PowerShell</span>
+</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</span></code></pre></div>
+
+### 4️⃣ Start the proxy daemon
+
+> **💻 Run on your computer — new terminal**
+
+> [!NOTE]
+> Needed **even though the container is on localhost** — Claude Desktop's sandbox blocks localhost TCP too.
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nb">cd</span><span class="w"> </span>phantomstrike
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PHANTOMSTRIKE_API_KEY</span><span class="o">=</span><span class="s2">"the-same-key-from-step-2"</span>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>python3<span class="w"> </span>proxy_daemon.py<span class="w"> </span>--remote<span class="w"> </span>http://localhost:8443
+</span></code></pre></div>
+
+Confirm it prints `Auth: API key loaded`. **Leave this terminal open.**
+
+### 5️⃣ Connect Claude Desktop
+
+> **💻 Run on your computer**
+
+| OS | Config file |
+|:--|:--|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+
+<div class="language-json highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">{</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">  </span><span class="nt">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">    </span><span class="nt">"phantomstrike"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">      </span><span class="nt">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/full/path/to/phantomstrike/.venv/bin/phantomstrike-mcp"</span><span class="p">,</span>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="w">      </span><span class="nt">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"--mode"</span><span class="p">,</span><span class="w"> </span><span class="s2">"remote"</span><span class="p">]</span>
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="p">}</span>
+</span></code></pre></div>
+
+Quit Claude Desktop completely and reopen it.
+
+### 6️⃣ Check it works
+
+Ask Claude: *"List all available PhantomStrike tools"*
+
+### 🔄 Restarting later
+
+See [Restarting it later](#-restarting-it-later). Container commands:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w">           </span><span class="c1"># start</span>
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w">            </span><span class="c1"># stop</span>
+</span><span id="__span-33-3"><a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w">         </span><span class="c1"># watch logs</span>
+</span><span id="__span-33-4"><a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build<span class="w">   </span><span class="c1"># rebuild after code changes</span>
+</span></code></pre></div>
+
+</details>
+
+<p><br></p>
+<h2 id="restarting-it-later">🔄 Restarting it later</h2>
+<blockquote>
+<p>[!TIP]
+<strong>You never need to reinstall.</strong> If you used the setup script, restarting is one command.</p>
+</blockquote>
+<h3 id="if-you-used-the-setup-script">If you used the setup script</h3>
+<p><code>start.sh</code> knows which half it was installed as, so plain <code>./start.sh</code> does the right thing on each machine. Be explicit if you'd rather not think about it.</p>
+<h4 id="linux-macos">🐧 Linux / macOS</h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="nb">cd</span><span class="w"> </span>~/phantomstrike
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>./start.sh<span class="w"> </span>status<span class="w">     </span><span class="c1"># is the server up and reachable?</span>
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>./start.sh<span class="w"> </span>server<span class="w">     </span><span class="c1"># 🐉 run this in the VM</span>
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>./start.sh<span class="w"> </span>proxy<span class="w">      </span><span class="c1"># 💻 run this on your computer</span>
+</span></code></pre></div>
+<h4 id="windows">🪟 Windows</h4>
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="nb">cd </span><span class="nv">$env:USERPROFILE</span><span class="p">\</span><span class="n">phantomstrike</span>
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="p">.\</span><span class="n">start</span><span class="p">.</span><span class="n">ps1</span> <span class="n">status</span>
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="p">.\</span><span class="n">start</span><span class="p">.</span><span class="n">ps1</span> <span class="n">server</span>
+</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="p">.\</span><span class="n">start</span><span class="p">.</span><span class="n">ps1</span> <span class="n">proxy</span>
+</span></code></pre></div>
+<p><br></p>
+<p><strong>Path B, after a reboot, in order:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Where</th>
+<th style="text-align: left;">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">🐉 Kali / Parrot VM</td>
+<td style="text-align: left;"><code>cd ~/phantomstrike &amp;&amp; ./start.sh server</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">💻 Your computer</td>
+<td style="text-align: left;"><code>cd ~/phantomstrike &amp;&amp; ./start.sh proxy</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">💻 Your computer</td>
+<td style="text-align: left;">Open your AI agent</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing to reinstall and no keys to re-enter — they're already in <code>.env</code> on both machines.</p>
+<h3 id="if-you-set-up-manually">If you set up manually</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Path</th>
+<th style="text-align: left;">After a reboot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">🐉 <strong>A</strong></td>
+<td style="text-align: left;"><strong>Nothing.</strong> Just open your AI agent.</td>
+</tr>
+<tr>
+<td style="text-align: left;">🔗 <strong>B</strong></td>
+<td style="text-align: left;">1. 🐉 Kali/Parrot: <code>./start.sh server</code> &nbsp; 2. 💻 <code>./start.sh proxy</code> &nbsp; 3. Open Claude Desktop</td>
+</tr>
+<tr>
+<td style="text-align: left;">🐳 <strong>C</strong></td>
+<td style="text-align: left;">1. 💻 <code>docker compose up -d</code> &nbsp; 2. 💻 <code>./start.sh proxy</code> &nbsp; 3. Open Claude Desktop</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!IMPORTANT]
+Terminals running the server or proxy must <strong>stay open</strong> while you work. Closing one stops that piece.</p>
+</blockquote>
+<p><br></p>
+<h2 id="safety-controls">🛡️ Safety controls</h2>
+<p>Three settings decide how much this tool can do.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Setting</th>
+<th style="text-align: center;">Default</th>
+<th style="text-align: left;">What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PHANTOMSTRIKE_API_KEYS</code></td>
+<td style="text-align: center;">🔴 <strong>required</strong></td>
+<td style="text-align: left;">Server refuses to start without it. Paths B &amp; C.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>PHANTOMSTRIKE_ENGAGEMENT</code></td>
+<td style="text-align: center;">⚪ unset</td>
+<td style="text-align: left;">Scope file. Targets outside it are refused.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>PHANTOMSTRIKE_ALLOW_RAW_SHELL</code></td>
+<td style="text-align: center;">🟢 <code>true</code></td>
+<td style="text-align: left;">Universal access to all 600+ tools. Set <code>false</code> for a plugins-only lockdown.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="limiting-what-can-be-scanned">Limiting what can be scanned</h3>
+<p>Without a scope file, PhantomStrike scans whatever it's asked to. Copy <code>engagement.example.yaml</code> → <code>engagement.yaml</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="nt">client</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Example Corp</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="nt">in_scope</span><span class="p">:</span>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.0.0/16</span>
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"*.staging.example.com"</span>
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="nt">out_of_scope</span><span class="p">:</span>
+</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.99.0/24</span><span class="w">        </span><span class="c1"># wins over in_scope</span>
+</span></code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PHANTOMSTRIKE_ENGAGEMENT</span><span class="o">=</span>./engagement.yaml
+</span></code></pre></div>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Why this is enforced below the agent.</strong> An AI agent decides what to run next based on tool output — and tool output comes from the host being scanned. A target can plant text in a service banner or HTTP response aimed at steering the agent. Scope is checked in the execution path, so a redirected agent still can't reach a host outside your engagement. Full threat model in <a href="SECURITY.md">SECURITY.md</a>.</p>
+</blockquote>
+<p><br></p>
+<h2 id="troubleshooting">🩺 Troubleshooting</h2>
+<div align="center">
+
+| 😖 Symptom | 🔍 Cause | ✅ Fix |
+|:--|:--|:--|
+| **Can't paste the key out of the VM** | Guest→host clipboard is unreliable | You shouldn't have to. Run `./setup.sh --client` on your **computer** first and paste its one line *into* the VM |
+| **Agent shows no PhantomStrike tools** | Config not loaded | Re-run `./setup.sh --client` — it edits the config for you — then **fully quit** the agent (<kbd>⌘</kbd>+<kbd>Q</kbd>) and reopen |
+| **"No AI agent found"** during setup | App installed but never launched | Open the app once so it creates its settings folder, then re-run the script |
+| **Everything returns 401** | Server key ≠ client key | Re-run `./setup.sh --client` on your computer and paste its line into the VM again. It replaces the VM's old key |
+| `no API keys are configured` | Working as designed | `export PHANTOMSTRIKE_API_KEYS="<key>"`, or run `./setup.sh` |
+| Proxy says `Auth: NO KEY SET` | Not exported in that terminal | Use `./start.sh proxy`, which loads `.env` for you |
+| `./start.sh status` says **not reachable** | Server not started, wrong IP, or firewall | Start `./start.sh server` in the VM · recheck `ip -4 addr \| grep inet` · `sudo ufw allow 8443` |
+| `kali_shell` missing | Explicitly turned off | Remove `PHANTOMSTRIKE_ALLOW_RAW_SHELL=false` from `.env` |
+| Won't start: "unauthenticated root shell" | Auth off + shell on + public bind | Enable auth, or bind to `127.0.0.1` |
+| `out of scope` refusals | Engagement file active | Add target to `in_scope`, or unset the variable |
+| `binary not found` | Tool not installed | `sudo apt install -y <tool>` (in the VM) |
+| `masscan` fails: `permission denied` | It needs raw sockets | Run it via `sudo`, or once: `sudo setcap cap_net_raw+ep $(which masscan)` |
+| `nuclei`: `no templates provided for scan` | Templates were never downloaded | `nuclei -update-templates` (in the VM). If that also fails, clone them directly: `git clone --depth 1 https://github.com/projectdiscovery/nuclei-templates.git ~/.local/nuclei-templates` |
+| `amass` returns 0 subdomains, every time | Working as designed in passive mode | Passive mode stores results in its local database, not stdout. Run `amass db -names -d <target>` to read them, or call `amass` again with `passive: false` |
+
+</div>
+
+<details>
+<summary><b>Checking the pairing by hand</b></summary>
+
+<br>
+
+Both machines must hold the **same** key. On each, print it:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="c1"># 🐉 in the VM</span>
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>grep<span class="w"> </span>PHANTOMSTRIKE_API_KEYS<span class="w"> </span>~/phantomstrike/.env
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="c1"># 💻 on your computer</span>
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>grep<span class="w"> </span>PHANTOMSTRIKE_API_KEY<span class="w"> </span>~/phantomstrike/.env
+</span></code></pre></div>
+
+Compare the last few characters. If they differ, re-run `./setup.sh --client` on your computer and paste its line into the VM — that resets the VM to match.
+
+Then check the server answers your computer at all:
+
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># 💻 on your computer</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>curl<span class="w"> </span>http://&lt;vm-ip&gt;:8443/health
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a><span class="c1"># {"status":"healthy", ...}</span>
+</span></code></pre></div>
+
+No response means it's a network problem (IP, firewall, VM network mode), not a key problem.
+
+</details>
+
+<p><strong>Still stuck?</strong> <a href="https://github.com/Red-Snow/phantomstrike/issues">Open an issue</a> with your path (A/B/C), the command, and the output.</p>
+<p><br></p>
+<h2 id="available-tools">🧰 Available tools</h2>
+<p>Twelve tools ship with dedicated parsers, so their results come back structured rather than as raw text:</p>
+<div align="center">
+
+| Category | Tools |
+|:--|:--|
+| 🌐 **Network** | `nmap` · `masscan` · `rustscan` |
+| 🕸️ **Web** | `nuclei` · `nikto` · `ffuf` · `gobuster` · `sqlmap` |
+| 🔍 **OSINT** | `amass` · `subfinder` |
+| ☁️ **Cloud** | `trivy` |
+| 🔑 **Credentials** | `hydra` |
+
+</div>
+
+<h3 id="everything-else">🔓 Everything else</h3>
+<p><strong><code>kali_shell</code> gives your agent the other 600+.</strong> <code>wpscan</code>, <code>dirb</code>, <code>enum4linux</code>,
+<code>crackmapexec</code>, <code>john</code>, <code>responder</code>, <code>metasploit</code> — anything installed on the box,
+plus <code>grep</code>, <code>pip</code>, and any script you've written yourself. Works the same on
+Kali and Parrot.</p>
+<p><strong>It is on by default.</strong> That is the point of the framework: your agent gets the
+whole distribution, not a curated subset.</p>
+<blockquote>
+<p>[!IMPORTANT]
+What keeps this safe is <strong>authentication</strong>, not switching the feature off. The
+API key and the cross-origin guard mean the shell answers only to you. See
+<a href="#-safety-controls">Safety controls</a> and <a href="SECURITY.md">SECURITY.md</a>.</p>
+</blockquote>
+<p><br></p>
+<h2 id="try-asking">💬 Try asking</h2>
+<blockquote>
+<p><em>"Scan 10.10.0.5 for open ports and tell me what's exposed"</em></p>
+<p><em>"Run nuclei against https://staging.example.com and summarise anything high severity"</em></p>
+<p><em>"Use wpscan on this WordPress site, then enum4linux the file server"</em></p>
+</blockquote>
+<p><br></p>
+<h2 id="contributing">🤝 Contributing</h2>
+<p>Adding a tool means writing one plugin class — see <a href="CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
+<p>Found a security issue? Please report it privately via <a href="SECURITY.md">SECURITY.md</a> rather than opening an issue.</p>
+<p><br></p>
+<hr />
+<div align="center">
+
+**[⬆ Back to top](#-phantomstrike)**
+
+Released under the [MIT License](LICENSE) · Built by [Red-Snow](https://github.com/Red-Snow)
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
