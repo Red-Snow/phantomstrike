@@ -10,11 +10,13 @@
 #    Client       The AI agent is here; the tools are on another machine
 #                 (a Kali/Parrot VM, or Docker). Typical on a Mac or Windows
 #                 host running Claude Desktop.
-#                 ./setup.sh --client --server http://<vm-ip>:8443
+#                 ./setup.sh --client
 #
-#  From the internet:
-#      curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash
-#      curl -sSL .../setup.sh | bash -s -- --client --server http://192.168.72.128:8443
+#  Pairing the two machines:
+#    Run the client first. It generates the key and prints one line to paste
+#    into the VM. Paste travels host-to-guest, which works in VMware Fusion
+#    and VirtualBox; guest-to-host frequently does not, so nothing ever has to
+#    be copied OUT of the VM.
 #
 #  Safe to re-run. It skips work that is already done rather than reinstalling.
 #
@@ -64,16 +66,18 @@ cat <<'EOF'
                       host talking to a Kali/Parrot VM.
 
     --server <url>    Where the tools are, e.g. http://192.168.72.128:8443
-                      (client mode only)
+                      (client mode; prompted for if omitted)
 
-    --api-key <key>   The key the server was started with. Must match exactly.
-                      (client mode only)
+    --api-key <key>   Use this key instead of generating one. The client
+                      prints the exact command that supplies it to the server.
 
     -h, --help        Show this.
 
-  Examples:
-    ./setup.sh
-    ./setup.sh --client --server http://192.168.72.128:8443 --api-key abc123
+  Pairing two machines:
+    1. On the Mac/Windows host:  ./setup.sh --client
+    2. Paste the line it prints into your Kali/Parrot VM.
+    3. On the VM:                ./start.sh server
+    4. Back on the host:         ./start.sh proxy
 
 EOF
 exit 0
@@ -84,6 +88,7 @@ exit 0
 ROLE=""                 # allinone | client
 REMOTE_URL=""
 PROVIDED_KEY=""
+PAIR_COMMAND=""
 
 parse_args() {
     while [ $# -gt 0 ]; do
@@ -163,8 +168,14 @@ decide_role() {
         return
     fi
 
-    # Kali and Parrot are pentest distros: the tools are already here, so
-    # all-in-one is almost always what is wanted.
+    # A key handed in from a client means this machine is the server half.
+    if [ -n "$PROVIDED_KEY" ]; then
+        ROLE="allinone"
+        ok "Mode: ${B}server${N} (pairing with the client that gave us this key)"
+        return
+    fi
+
+    # Kali and Parrot are pentest distros: the tools are already here.
     if [ "$DISTRO" = "kali" ] || [ "$DISTRO" = "parrot" ]; then
         ROLE="allinone"
         ok "Mode: ${B}all-in-one${N} (tools and agent both on this machine)"
@@ -319,21 +330,31 @@ setup_config() {
     step "Setting up configuration"
 
     if [ "$ROLE" = "client" ]; then
-        # The server owns the key. Generating one here would produce a
-        # mismatch, and every tool call would come back 401.
         if [ -f ".env" ] && grep -q "^PHANTOMSTRIKE_API_KEY=" .env; then
+            API_KEY=$(grep "^PHANTOMSTRIKE_API_KEY=" .env | head -1 | cut -d= -f2- | tr -d '"')
             ok "Existing config found in .env — keeping it"
+            PAIR_COMMAND="curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --api-key $API_KEY"
             return
         fi
 
+        # The CLIENT generates the key, not the server.
+        #
+        # Why this direction: in VMware Fusion and VirtualBox, host-to-guest
+        # paste normally works while guest-to-host often does not. Generating
+        # on the server would force a copy out of the VM — the direction that
+        # fails — so we generate here and hand the operator one line to paste
+        # INTO the VM instead.
         API_KEY="$PROVIDED_KEY"
-        if [ -z "$API_KEY" ] && [ -t 0 ]; then
-            echo -en "  ${B}?${N} API key from your Kali/Parrot box (blank to fill in later): "
-            read -r API_KEY || true
-        fi
+        [ -n "$API_KEY" ] || API_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
+
         if [ -z "$REMOTE_URL" ] && [ -t 0 ]; then
-            echo -en "  ${B}?${N} Server URL, e.g. http://192.168.72.128:8443 : "
-            read -r REMOTE_URL || true
+            echo ""
+            info "On your Kali/Parrot VM, run:  ${B}ip -4 addr | grep inet${N}"
+            info "It shows something like ${B}192.168.72.128${N} — type it here."
+            echo ""
+            echo -en "  ${B}?${N} VM IP address (just the numbers): "
+            read -r VM_IP || true
+            [ -n "$VM_IP" ] && REMOTE_URL="http://${VM_IP}:8443"
         fi
         [ -n "$REMOTE_URL" ] || REMOTE_URL="http://CHANGE-ME:8443"
 
@@ -342,27 +363,26 @@ setup_config() {
             echo "# This machine runs the AI agent. The tools run on the server below."
             echo ""
             echo "# Must match PHANTOMSTRIKE_API_KEYS on that server, exactly."
-            echo "PHANTOMSTRIKE_API_KEY=${API_KEY:-CHANGE_ME_key_from_your_server}"
+            echo "PHANTOMSTRIKE_API_KEY=$API_KEY"
             echo "PHANTOMSTRIKE_REMOTE=$REMOTE_URL"
         } > .env
 
-        if [ -z "$API_KEY" ] || [ "$REMOTE_URL" = "http://CHANGE-ME:8443" ]; then
-            warn "Config incomplete — edit .env before starting"
-            info "You need the API key and the IP from your Kali/Parrot box."
-        else
-            ok "Client config written to .env"
-        fi
+        ok "Client config written to .env"
+        PAIR_COMMAND="curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --api-key $API_KEY"
         return
     fi
 
-    # All-in-one: this machine runs the server, so it owns the key.
+    # All-in-one / server: this machine runs the server, so it holds the key.
     if [ -f ".env" ] && grep -q "^PHANTOMSTRIKE_API_KEYS=" .env; then
         API_KEY=$(grep "^PHANTOMSTRIKE_API_KEYS=" .env | head -1 | cut -d= -f2- | tr -d '"')
         ok "Existing key found in .env — keeping it"
         return
     fi
 
-    API_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
+    # --api-key lets the client hand us its key, so nothing has to be copied
+    # OUT of this VM. Falls back to generating one for standalone installs.
+    API_KEY="$PROVIDED_KEY"
+    [ -n "$API_KEY" ] || API_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
     {
         echo "# PhantomStrike configuration — generated by setup.sh"
         echo "# This file contains a secret. Do not commit it."
@@ -370,9 +390,12 @@ setup_config() {
         echo "PHANTOMSTRIKE_ENFORCE_SCOPE=true"
         echo "PHANTOMSTRIKE_ALLOW_RAW_SHELL=true"
     } >> .env
-    ok "Key generated and saved to .env"
-    info "Your client machine needs this exact key. Show it later with:"
-    info "  grep API_KEYS .env"
+
+    if [ -n "$PROVIDED_KEY" ]; then
+        ok "Using the key your client machine supplied — nothing to copy back"
+    else
+        ok "Key generated and saved to .env"
+    fi
 }
 
 # ── Start script ─────────────────────────────────────────────────────
@@ -433,10 +456,9 @@ case "$MODE" in
   proxy)
     REMOTE="${2:-${PHANTOMSTRIKE_REMOTE:-http://localhost:8443}}"
     export PHANTOMSTRIKE_API_KEY="${PHANTOMSTRIKE_API_KEY:-${PHANTOMSTRIKE_API_KEYS:-}}"
-    if [ -z "$PHANTOMSTRIKE_API_KEY" ] || [ "$PHANTOMSTRIKE_API_KEY" = "CHANGE_ME_key_from_your_server" ]; then
+    if [ -z "$PHANTOMSTRIKE_API_KEY" ]; then
         echo -e "${R}No API key set.${N}"
-        echo -e "Edit .env and set PHANTOMSTRIKE_API_KEY to the same value your"
-        echo -e "server was started with (PHANTOMSTRIKE_API_KEYS over there)."
+        echo -e "Run ./setup.sh --client to generate one."
         exit 1
     fi
     case "$REMOTE" in
@@ -444,6 +466,7 @@ case "$MODE" in
         echo -e "${R}Server URL not set.${N}"
         echo -e "Edit .env and set PHANTOMSTRIKE_REMOTE to your Kali/Parrot box,"
         echo -e "e.g. http://192.168.72.128:8443"
+        echo -e "Find the IP by running on the VM:  ip -4 addr | grep inet"
         exit 1 ;;
     esac
     echo -e "${B}${C}Starting PhantomStrike proxy daemon${N}"
@@ -516,17 +539,56 @@ configure_agent() {
         [ -d "$dir" ] || continue
 
         if [ -f "$cfg" ]; then
-            if grep -q "phantomstrike" "$cfg" 2>/dev/null; then
-                ok "Already configured: $(basename "$cfg")"
-                written="yes"; continue
-            fi
+            # Merge rather than print instructions. Hand-editing JSON is the
+            # step people get stuck on, and it is the step a script can do
+            # perfectly: load, add our key, write back, keep everything else.
             cp "$cfg" "$cfg.backup-$(date +%s)"
-            warn "$(basename "$cfg") already has other MCP servers in it."
-            info "Backed it up. Add this entry to \"mcpServers\" yourself:"
-            echo -e "${DIM}    \"phantomstrike\": {\"command\": \"$mcp_bin\", \"args\": [\"--mode\", \"$mcp_mode\"]}${N}"
+            if MCP_BIN="$mcp_bin" MCP_MODE="$mcp_mode" python3 - "$cfg" <<'PYMERGE'
+import json, os, sys
+
+path = sys.argv[1]
+try:
+    with open(path, encoding="utf-8") as fh:
+        text = fh.read().strip()
+    config = json.loads(text) if text else {}
+except (json.JSONDecodeError, OSError):
+    # Malformed or unreadable: refuse to guess. The backup is already made,
+    # and the shell prints the manual snippet when this exits non-zero.
+    sys.exit(1)
+
+if not isinstance(config, dict):
+    sys.exit(1)
+
+servers = config.setdefault("mcpServers", {})
+if not isinstance(servers, dict):
+    sys.exit(1)
+
+servers["phantomstrike"] = {
+    "command": os.environ["MCP_BIN"],
+    "args": ["--mode", os.environ["MCP_MODE"]],
+}
+
+with open(path, "w", encoding="utf-8") as fh:
+    json.dump(config, fh, indent=2)
+    fh.write("\n")
+PYMERGE
+            then
+                local others; others=$(python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d.get('mcpServers',{}))-1)" "$cfg" 2>/dev/null || echo 0)
+                if [ "$others" -gt 0 ] 2>/dev/null; then
+                    ok "Merged into $(basename "$cfg") ${DIM}(--mode $mcp_mode, kept $others other server(s))${N}"
+                else
+                    ok "Updated $(basename "$cfg") ${DIM}(--mode $mcp_mode)${N}"
+                fi
+                written="yes"
+            else
+                warn "$(basename "$cfg") is not valid JSON — not touching it."
+                info "Backup saved. Add this inside \"mcpServers\" by hand:"
+                echo -e "${DIM}    \"phantomstrike\": {\"command\": \"$mcp_bin\", \"args\": [\"--mode\", \"$mcp_mode\"]}${N}"
+            fi
         else
-            echo "$snippet" > "$cfg"
-            ok "Wrote $(basename "$cfg") ${DIM}(--mode $mcp_mode)${N}"
+            mkdir -p "$dir"
+            echo "$snippet" | python3 -c "import json,sys;json.dump(json.load(sys.stdin),open(sys.argv[1],'w'),indent=2)" "$cfg"
+            ok "Created $(basename "$cfg") ${DIM}(--mode $mcp_mode)${N}"
             written="yes"
         fi
     done
@@ -553,8 +615,7 @@ configure_agent() {
     if [ "$written" = "no" ]; then
         warn "No AI agent detected on this machine."
         info "PhantomStrike works with any MCP-compatible agent. Install one"
-        info "(Claude Desktop, Cursor, Codex, Gemini CLI), then add:"
-        echo -e "${DIM}    $snippet${N}"
+        info "(Claude Desktop, Cursor, Codex, Gemini CLI), then re-run this script."
     fi
 }
 
@@ -575,8 +636,13 @@ print_summary() {
         echo ""
         echo -e "${B}  What to do now${N}"
         echo ""
-        echo -e "  ${C}1.${N} On your Kali/Parrot box, start the server:"
-        echo -e "        ${DIM}cd phantomstrike && ./start.sh server${N}"
+        echo -e "  ${C}1.${N} ${B}Copy the line below${N} and paste it into your Kali/Parrot VM."
+        echo -e "     ${DIM}(Host-to-VM paste works; that is why the key is generated here.)${N}"
+        echo ""
+        echo -e "     ${G}${PAIR_COMMAND}${N}"
+        echo ""
+        echo -e "     ${DIM}Then on the VM:  cd ~/phantomstrike && ./start.sh server${N}"
+        echo ""
         echo -e "  ${C}2.${N} Back here, start the bridge and leave it open:"
         echo -e "        ${B}cd $INSTALL_DIR && ./start.sh proxy${N}"
         echo -e "  ${C}3.${N} Quit your AI agent completely, then reopen it"
@@ -599,8 +665,15 @@ print_summary() {
         echo ""
         echo -e "${B}  What to do now${N}"
         echo ""
-        echo -e "  ${C}1.${N} Restart your AI agent so it picks up the new config"
-        echo -e "  ${C}2.${N} Ask it: ${DIM}\"List all available PhantomStrike tools\"${N}"
+        if [ -n "$PROVIDED_KEY" ]; then
+            echo -e "  ${C}1.${N} Start the server and leave it open:"
+            echo -e "        ${B}cd $INSTALL_DIR && ./start.sh server${N}"
+            echo -e "  ${C}2.${N} Back on your host machine: ${B}./start.sh proxy${N}"
+            echo -e "  ${C}3.${N} Quit your AI agent completely, then reopen it"
+        else
+            echo -e "  ${C}1.${N} Restart your AI agent so it picks up the new config"
+            echo -e "  ${C}2.${N} Ask it: ${DIM}\"List all available PhantomStrike tools\"${N}"
+        fi
         echo ""
         echo -e "${B}  Next time you reboot${N}"
         echo ""
