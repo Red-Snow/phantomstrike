@@ -4,7 +4,7 @@ FFuf Plugin — Fast web fuzzer for directory, parameter, and vhost discovery.
 
 from __future__ import annotations
 
-import json
+import re
 from pydantic import BaseModel, Field
 
 from phantomstrike.plugins.base import (
@@ -41,13 +41,22 @@ class FfufPlugin(BaseToolPlugin):
         if params.filter_size:
             cmd.extend(["-fs", params.filter_size])
 
-        # JSON output
-        cmd.extend(["-of", "json", "-o", "/dev/stdout"])
-
         if params.additional_args:
             cmd.extend(params.additional_args.split())
 
         return cmd
+
+    # Matches ffuf's default per-result line, e.g.:
+    #   docs   [Status: 200, Size: 81, Words: 1, Lines: 1, Duration: 3ms]
+    _RESULT_PATTERN = re.compile(
+        r"(\S+)\s+\[Status:\s*(\d+),\s*Size:\s*(\d+),\s*Words:\s*(\d+),\s*Lines:\s*(\d+)"
+    )
+    # ffuf redraws its progress line in place using ANSI cursor-control
+    # codes (e.g. "\x1b[2K" to clear the line). Confirmed against the real
+    # binary: those codes land immediately before the matched value with no
+    # separating whitespace, so a plain \S+ match for the first group
+    # swallows them into the reported name unless stripped first.
+    _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
 
     def parse_output(self, stdout: str, stderr: str, exit_code: int) -> ToolResult:
         result = ToolResult(
@@ -55,27 +64,32 @@ class FfufPlugin(BaseToolPlugin):
             target="", stdout=stdout, stderr=stderr,
         )
 
+        # ffuf previously wrote JSON to "-o /dev/stdout", but opening that path
+        # as a second file handle while stdout is already a pipe (which is how
+        # the runner always invokes it) reliably fails with
+        # "open /dev/stdout: no such device or address" on this environment,
+        # silently dropping every result. Parsing ffuf's normal result lines
+        # (always printed regardless of -o) avoids the failure mode entirely —
+        # confirmed against the real ffuf 2.1.0-dev binary.
+        clean_stdout = self._ANSI_ESCAPE.sub("", stdout)
+
         discovered = []
-        try:
-            data = json.loads(stdout)
-            for entry in data.get("results", []):
-                item = {
-                    "input": entry.get("input", {}).get("FUZZ", ""),
-                    "url": entry.get("url", ""),
-                    "status": entry.get("status", 0),
-                    "length": entry.get("length", 0),
-                    "words": entry.get("words", 0),
-                    "lines": entry.get("lines", 0),
-                }
-                discovered.append(item)
-                result.findings.append(Finding(
-                    title=f"Discovered: {item['input']} (HTTP {item['status']})",
-                    severity=Severity.LOW if item["status"] in (200, 204) else Severity.INFO,
-                    target=item["url"],
-                    description=f"Size: {item['length']} bytes, Words: {item['words']}",
-                ))
-        except json.JSONDecodeError:
-            result.parsed_data = {"raw_output": stdout}
+        for match in self._RESULT_PATTERN.finditer(clean_stdout):
+            fuzz_value, status, size, words, lines = match.groups()
+            item = {
+                "input": fuzz_value,
+                "status": int(status),
+                "length": int(size),
+                "words": int(words),
+                "lines": int(lines),
+            }
+            discovered.append(item)
+            result.findings.append(Finding(
+                title=f"Discovered: {item['input']} (HTTP {item['status']})",
+                severity=Severity.LOW if item["status"] in (200, 204) else Severity.INFO,
+                target=item["input"],
+                description=f"Size: {item['length']} bytes, Words: {item['words']}",
+            ))
 
         result.parsed_data = {"discovered": discovered, "total": len(discovered)}
         if exit_code != 0 and not discovered:

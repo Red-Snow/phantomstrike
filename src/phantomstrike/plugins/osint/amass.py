@@ -38,6 +38,10 @@ class AmassPlugin(BaseToolPlugin):
 
         return cmd
 
+    # Amass's own wording (checked against the real v4.1.0 binary) when
+    # -passive is set: it deliberately prints no discovered names at all.
+    _PASSIVE_NO_OUTPUT_MARKER = "Passive mode does not generate output during the enumeration"
+
     def parse_output(self, stdout: str, stderr: str, exit_code: int) -> ToolResult:
         result = ToolResult(
             tool_name=self.name, status=ToolStatus.SUCCESS if exit_code == 0 else ToolStatus.FAILED,
@@ -52,6 +56,21 @@ class AmassPlugin(BaseToolPlugin):
             ))
 
         result.parsed_data = {"subdomains": subdomains, "total": len(subdomains)}
-        if exit_code != 0 and not subdomains:
+
+        if not subdomains and self._PASSIVE_NO_OUTPUT_MARKER in stderr:
+            # Checked every documented flag on the real binary (-o, -oA, -v,
+            # -json) — none of them make passive mode print names. Amass
+            # stores them only in its local graph database in this mode.
+            # "0 subdomains" here does NOT mean the domain has none; without
+            # this note that's exactly what it looks like.
+            result.parsed_data["note"] = (
+                "Amass ran in passive mode, which stores discovered names in its local "
+                "graph database instead of printing them — this is not a failure, and "
+                "does not mean the domain has no subdomains. Retrieve them with a "
+                "follow-up kali_shell command: amass db -names -d <target>. To get "
+                "results directly from this tool instead, call it again with "
+                "passive=false (enables DNS resolution against the target)."
+            )
+        elif exit_code != 0 and not subdomains:
             result.error_message = stderr or "Amass enumeration failed"
         return result

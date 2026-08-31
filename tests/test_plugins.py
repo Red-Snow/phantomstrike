@@ -196,6 +196,126 @@ class TestCommandBuilding:
         assert "-d" in cmd
         assert "-silent" in cmd
 
+    def test_ffuf_does_not_request_dev_stdout(self):
+        # "-of json -o /dev/stdout" used to be here and reliably crashed ffuf
+        # ("open /dev/stdout: no such device or address") because the runner
+        # already holds stdout open as a pipe. Confirmed against the real
+        # 2.1.0-dev binary; must never come back.
+        plugin = FfufPlugin()
+        params = plugin.InputSchema(target="http://example.com/FUZZ")
+        cmd = plugin.build_command(params)
+        assert "/dev/stdout" not in cmd
+
+    def test_ffuf_parses_real_output(self, tmp_path):
+        # End-to-end against the real binary: strips the ANSI cursor-control
+        # codes ffuf uses to redraw its progress line, which otherwise land
+        # inside the captured filename (confirmed while building this fix —
+        # an ANSI-agnostic version of this test would have passed anyway).
+        ffuf = shutil.which("ffuf")
+        if not ffuf:
+            pytest.skip("ffuf binary not installed")
+
+        (tmp_path / "found.txt").write_text("ok")
+        wordlist = tmp_path / "wordlist.txt"
+        wordlist.write_text("found.txt\nmissing.txt\n")
+
+        with socketserver.TCPServer(("127.0.0.1", 0), functools.partial(
+            http.server.SimpleHTTPRequestHandler, directory=str(tmp_path)
+        )) as httpd:
+            port = httpd.server_address[1]
+            thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+            thread.start()
+            try:
+                plugin = FfufPlugin()
+                params = plugin.InputSchema(
+                    target=f"http://127.0.0.1:{port}/FUZZ", wordlist=str(wordlist),
+                )
+                cmd = plugin.build_command(params)
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                assert proc.returncode == 0, proc.stderr
+                result = plugin.parse_output(proc.stdout, proc.stderr, proc.returncode)
+                assert result.parsed_data["total"] == 1
+                assert result.parsed_data["discovered"][0]["input"] == "found.txt"
+            finally:
+                httpd.shutdown()
+
+    def test_nikto_does_not_request_dev_stdout(self):
+        # "-Format json -output /dev/stdout" used to be here. Nikto silently
+        # rewrites that to "/dev/stdout.json" whenever -Format is json,
+        # which isn't a real path, and the whole scan fails to write its
+        # report and exits non-zero (confirmed against the real 2.6.0
+        # binary). Must never come back.
+        plugin = NiktoPlugin()
+        params = plugin.InputSchema(target="http://example.com")
+        cmd = plugin.build_command(params)
+        assert "/dev/stdout" not in cmd
+
+    def test_nikto_severity_keywords_use_word_boundaries(self):
+        # A plain substring check for "rce" previously misclassified this
+        # exact real Nikto message as HIGH severity, because "force" contains
+        # "rce". Confirmed live, then fixed with \b-bounded regexes.
+        plugin = NiktoPlugin()
+        stdout = (
+            "- Nikto v2.6.0\n"
+            "+ Target IP:          127.0.0.1\n"
+            "+ No CGI Directories found (use '-C all' to force check all possible dirs)\n"
+            "+ 1 host(s) tested\n"
+        )
+        result = plugin.parse_output(stdout, "", 0)
+        assert len(result.findings) == 1
+        assert result.findings[0].severity.value == "medium"
+
+    def test_nikto_parses_real_output(self):
+        # End-to-end against the real binary and a throwaway local server —
+        # the scenario that caught both the /dev/stdout crash and the OSVDB
+        # filter matching nothing on a modern Nikto version.
+        nikto = shutil.which("nikto")
+        if not nikto:
+            pytest.skip("nikto binary not installed")
+
+        with socketserver.TCPServer(("127.0.0.1", 0), http.server.SimpleHTTPRequestHandler) as httpd:
+            port = httpd.server_address[1]
+            thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+            thread.start()
+            try:
+                plugin = NiktoPlugin()
+                params = plugin.InputSchema(target=f"http://127.0.0.1:{port}")
+                cmd = plugin.build_command(params)
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+                assert proc.returncode == 0, proc.stderr
+                result = plugin.parse_output(proc.stdout, proc.stderr, proc.returncode)
+                assert result.parsed_data["total"] > 0, proc.stdout
+            finally:
+                httpd.shutdown()
+
+    def test_amass_passive_no_output_gets_explanatory_note(self):
+        # Amass's own documented behavior in -passive mode: it stores
+        # discovered names in its local graph database and prints none to
+        # stdout/stderr at all (confirmed against the real v4.1.0 binary; no
+        # flag changes this). Silently reporting "0 subdomains" here would
+        # read as "this domain has none", which is not what happened.
+        plugin = AmassPlugin()
+        stderr = (
+            "Passive mode does not generate output during the enumeration\n"
+            "\tObtain your list of FQDNs using the following command:\n"
+            "\tamass db -names -d example.com\n\n"
+            "The enumeration has finished"
+        )
+        result = plugin.parse_output("", stderr, 0)
+        assert result.parsed_data["total"] == 0
+        assert "note" in result.parsed_data
+        assert "amass db -names" in result.parsed_data["note"]
+        # Real failures (bad flags, network errors) must still surface as
+        # errors rather than being swallowed by the passive-mode note.
+        assert result.error_message == ""
+
+    def test_amass_genuine_failure_still_reports_error(self):
+        plugin = AmassPlugin()
+        result = plugin.parse_output("", "flag provided but not defined: -bogus", 1)
+        assert result.parsed_data["total"] == 0
+        assert "note" not in result.parsed_data
+        assert result.error_message
+
 
 class TestOutputParsing:
     """Verify plugins can parse output correctly."""
