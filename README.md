@@ -57,9 +57,13 @@ This is the setup for **Claude Desktop + a VM in VMware Fusion, Parallels, Virtu
 
 **Step 1 — on your Mac / Windows PC:**
 
+> **🍎🐧 macOS or Linux — Terminal**
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --client
 ```
+
+> **🪟 Windows — PowerShell**
 
 ```powershell
 irm https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.ps1 | iex
@@ -69,20 +73,31 @@ It asks for your VM's IP address, then prints **one line** that already contains
 
 **Step 2 — paste that line into your Kali / Parrot VM.** It looks like this:
 
+> **🐉 Paste this inside Kali / Parrot** — it works the same whether the VM runs in VMware Fusion, Parallels, VirtualBox, or WSL
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/Red-Snow/phantomstrike/main/setup.sh | bash -s -- --api-key <your-key>
 ```
 
 **Step 3 — start both halves and leave both windows open:**
 
+> **🐉 In the Kali / Parrot VM**
+
 ```bash
-# 🐉 in the VM
 cd ~/phantomstrike && ./start.sh server
 ```
 
+> **🍎🐧 On your Mac / Linux — Terminal**
+
 ```bash
-# 💻 on your Mac / PC
 cd ~/phantomstrike && ./start.sh proxy
+```
+
+> **🪟 On Windows — PowerShell**
+
+```powershell
+cd $env:USERPROFILE\phantomstrike
+.\start.ps1 proxy
 ```
 
 **Step 4 — fully quit your AI agent and reopen it.** On a Mac that's <kbd>⌘</kbd>+<kbd>Q</kbd>; closing the window isn't enough.
